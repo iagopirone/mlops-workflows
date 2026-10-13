@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+
+from subprocess import getoutput
+
+if getoutput("git branch --show-current") in ("main", "rc"):
+    print("Push bloqueado. Use uma branch feature.")
+    raise SystemExit(1)  # Interrompe o script com erro e bloqueia o push.
+
+print("Push permitido.")
