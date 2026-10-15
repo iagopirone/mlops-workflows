@@ -1,0 +1,20 @@
+flowchart TD
+    entrada["Entrada genérica"] --> seletor["Escolhedor de pipeline"]
+    seletor -. Consulta .-> repositorio["Repositório de pipelines"]
+    repositorio -. Pipeline selecionado .-> seletor
+    seletor -->|Pedido + pipeline| proxima
+    subgraph workflow["Workflow"]
+        proxima["Definir próxima etapa conforme os pré-requisitos"]
+        subgraph ciclo["Execução de componentes — 1 a N"]
+            buscar["Buscar e carregar artefatos"]
+            executar["Preparar e executar componente"]
+            registrar["Registrar saídas"]
+            buscar --> executar --> registrar
+        end
+        proxima -->|Etapas prontas| buscar
+        registrar -->|Resultado intermediário| proxima
+        subgraph finalizacao["Componente de finalização"]
+            finalizar["Organizar resultados finais e salvar/enviar"]
+        end
+        registrar -->|Saídas finais disponíveis e pré-requisitos atendidos| finalizar
+    end
