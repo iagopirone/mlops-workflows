@@ -1,0 +1,9 @@
+#!/bin/sh
+
+echo "Commit criado com sucesso no projeto MLOps."
+
+echo "Branch atual:"
+git branch --show-current
+
+echo "Último commit:"
+git log -1 --oneline

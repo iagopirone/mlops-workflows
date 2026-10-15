@@ -1,0 +1,62 @@
+classDiagram
+    direction TB
+    class WorkflowRunner {
+        run(event, pipeline)
+    }
+    class ComponentExecutor {
+        execute(component, contents)
+    }
+    class PipelineSelector {
+        execute(event) Pipeline
+    }
+    class StepSelector {
+        execute(pipeline)
+    }
+    class Event {
+        pipeline_id
+        sensor_data
+        shop_id
+        sensor_id
+    }
+    class PipelineRepository {
+        get_by_id(pipeline_id)
+    }
+    class Pipeline {
+        pipeline_id
+        steps
+    }
+    class Step {
+        step_name
+        depends_on
+        input_artifacts
+        component
+        output_artifacts
+    }
+    class Component {
+        prepare(Artifact)
+        execute(prepared_data) Artifact
+    }
+    class Artifact {
+        name
+        location
+        materialize() content
+        dematerialize(content)
+    }
+    WorkflowRunner ..> Event : utiliza
+    WorkflowRunner ..> Pipeline : utiliza
+    WorkflowRunner ..> ComponentExecutor : utiliza
+    WorkflowRunner ..> StepSelector : utiliza
+    PipelineSelector ..> WorkflowRunner : utiliza
+    PipelineSelector ..> Event : lê
+    PipelineSelector ..> PipelineRepository : consulta
+    PipelineRepository --> "1..*" Pipeline : contém
+    StepSelector ..> Pipeline : consulta
+    StepSelector ..> Step : seleciona
+    Pipeline --> "2..*" Step : contém
+    Step --> "0..*" Step : depende
+    Event --> "1" Artifact : sensor_data
+    Step --> "1" Component : component
+    Step --> "1..*" Artifact : input_artifacts
+    Step --> "1..*" Artifact : output_artifacts
+    ComponentExecutor ..> Component : utiliza
+    Component ..> Artifact : utiliza
