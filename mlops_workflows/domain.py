@@ -5,32 +5,7 @@ from dataclasses import dataclass, field
 
 from pydantic import BaseModel, ConfigDict, Field
 
-# DADOS
-
-
-class ArtifactContent(BaseModel):
-    """Conteúdo carregado ou produzido durante o processamento."""
-
-    data: object
-
-
-class Artifact(BaseModel, ABC):
-    """Referência de um artefato e operações sobre seu conteúdo."""
-
-    model_config = ConfigDict(strict=True, extra="forbid")
-
-    name: str = Field(min_length=1)
-    location: str = Field(min_length=1)
-
-    @abstractmethod
-    def materialize(self) -> ArtifactContent:
-        """Carrega o conteúdo."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def dematerialize(self, content: ArtifactContent) -> None:
-        """Armazena o conteúdo."""
-        raise NotImplementedError
+from mlops_workflows.artifacts.interface import Artifact
 
 
 class Event(BaseModel):
