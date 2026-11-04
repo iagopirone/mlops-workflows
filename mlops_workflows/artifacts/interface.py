@@ -1,35 +1,38 @@
-"""Contrato para carregar e armazenar conteúdos de artefatos."""
+"""Define the contract for artifact references."""
+
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from mlops_workflows.artifacts.content import ArtifactContent
+if TYPE_CHECKING:
+    from mlops_workflows.artifacts.content import ArtifactContent
 
 
-class Artifact(BaseModel, ABC):
-    model_config = ConfigDict(strict=True, extra="forbid")
+class ArtifactReference(BaseModel, ABC):
+    """Identify an artifact and define how its content is loaded."""
+
+    model_config = ConfigDict(
+        strict=True,
+        extra="forbid",
+        validate_assignment=True,
+    )
 
     name: str = Field(min_length=1)
     location: str = Field(min_length=1)
 
+    @field_validator("location")
+    @classmethod
+    def validate_location(cls, value: str) -> str:
+        """Reject blank locations."""
+        if not value.strip():
+            raise ValueError("The location must not be blank.")
+
+        return value
+
     @abstractmethod
     def materialize(self) -> ArtifactContent:
-        """Carrega o conteúdo referenciado pelo artefato."""
+        """Load and return the referenced content."""
         raise NotImplementedError
-
-    @abstractmethod
-    def dematerialize(self, content: ArtifactContent) -> str:  # retorna a referência
-        """Armazena o conteúdo na localização do artefato."""
-        raise NotImplementedError
-
-
-"""1. Criar uma classe-filho que herde tanto da Artifact quanto do ArtifactContent
-1. Implementar o que foi feito até agora (um artefato de verdade), fazendo os testes:
- - um artefato de um vídeo, um de detecção de imagens, etc. e ver como as coisas funcionam
- - trabalhar localmente (a referência é local)
- - a desmaterialização salva
-
-2. O BaseModel tem recursos para manipular os campos: converter pra Jason, adicionar... aprender essa estruturação. Assim, eu posso usar só o BaseModel para fazer estruturação.
-
-"""

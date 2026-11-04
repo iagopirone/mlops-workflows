@@ -1,7 +1,24 @@
-"""Conteúdo carregado ou produzido durante o processamento."""
+"""Define the contract for artifact contents."""
 
-from pydantic import BaseModel
+from abc import ABC, abstractmethod
+
+from pydantic import BaseModel, ConfigDict
+
+from mlops_workflows.artifacts.interface import ArtifactReference
 
 
-class ArtifactContent(BaseModel):
-    data: object = None  # permite criar o objeto sem informar data, ou seja, o conteúdo ainda não está disponível no objeto
+class ArtifactContent(BaseModel, ABC):
+    """Hold content and define how it is saved."""
+
+    model_config = ConfigDict(
+        strict=True,
+        extra="forbid",
+        validate_assignment=True,
+    )
+
+    data: object
+
+    @abstractmethod
+    def dematerialize(self, reference: ArtifactReference) -> str:
+        """Save the content and return its destination location."""
+        raise NotImplementedError

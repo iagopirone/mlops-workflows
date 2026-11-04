@@ -1,6 +1,5 @@
-"""Artefato para carregar e salvar vídeos locais sem áudio."""
+"""Load and save local videos without audio."""
 
-from math import isfinite
 from pathlib import Path
 
 import cv2
@@ -8,37 +7,26 @@ import numpy as np
 from pydantic import ConfigDict, Field
 
 from mlops_workflows.artifacts.content import ArtifactContent
-from mlops_workflows.artifacts.interface import Artifact
+from mlops_workflows.artifacts.interface import ArtifactReference
 
 
-class VideoArtifact(Artifact, ArtifactContent):
-    model_config = ConfigDict(
-        strict=True,
-        extra="forbid",
-        arbitrary_types_allowed=True,
-    )
+class VideoReference(ArtifactReference):
+    """Identify a video by its name and location."""
 
-    data: list[np.ndarray] | None = None
-    fps: float | None = Field(default=None, gt=0)
-
-    def materialize(self) -> ArtifactContent:
-        """Carrega os quadros em BGR e a taxa de reprodução."""
+    def materialize(self) -> "VideoContent":
+        """Load the video frames in BGR format and their playback rate."""
         path = Path(self.location)
 
         if not path.is_file():
-            raise FileNotFoundError(f"Vídeo não encontrado: {path}")
+            raise FileNotFoundError(f"Video file not found: {path}")
 
         capture = cv2.VideoCapture(str(path))
 
         try:
             if not capture.isOpened():
-                raise ValueError(f"Não foi possível abrir o vídeo: {path}")
+                raise ValueError(f"Could not open the video: {path}")
 
             fps = capture.get(cv2.CAP_PROP_FPS)
-
-            if not isfinite(fps) or fps <= 0:
-                raise ValueError("O vídeo não possui um FPS válido.")
-
             frames = []
 
             while True:
@@ -50,31 +38,33 @@ class VideoArtifact(Artifact, ArtifactContent):
                 frames.append(frame)
 
             if not frames:
-                raise ValueError("O vídeo não possui quadros legíveis.")
+                raise ValueError("The video has no readable frames.")
+
+            return VideoContent(data=frames, fps=fps)
         finally:
             capture.release()
 
-        self.data = frames
-        self.fps = fps
-        return self
 
-    def dematerialize(self, content: ArtifactContent) -> str:
-        """Salva os quadros como vídeo e retorna a localização."""
-        if not isinstance(content, VideoArtifact):
-            raise TypeError("O conteúdo deve ser um VideoArtifact.")
+class VideoContent(ArtifactContent):
+    """Store video frames and their playback rate."""
 
-        if not isinstance(content.data, list) or not content.data:
-            raise ValueError("O conteúdo deve conter uma lista de quadros.")
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-        if content.fps is None:
-            raise ValueError("O FPS deve ser informado.")
+    data: list[np.ndarray] = Field(min_length=1)
+    fps: float = Field(gt=0, allow_inf_nan=False)
 
-        if not isfinite(content.fps) or content.fps <= 0:
-            raise ValueError("O FPS deve ser positivo e finito.")
+    def validate_frames(self) -> None:
+        """Check that all frames are valid BGR images of equal size."""
+        if not self.data:
+            raise ValueError(
+                "The video must contain at least one frame."
+            )  # talvez seja reduntante
 
-        for frame in content.data:
+        expected_shape = None
+
+        for frame in self.data:
             if not isinstance(frame, np.ndarray):
-                raise TypeError("Cada quadro deve ser uma matriz NumPy.")
+                raise TypeError("Each frame must be a NumPy array.")
 
             if (
                 frame.dtype != np.uint8
@@ -82,39 +72,44 @@ class VideoArtifact(Artifact, ArtifactContent):
                 or frame.shape[2] != 3
                 or frame.size == 0
             ):
-                raise ValueError(
-                    "Cada quadro deve ser uma imagem BGR não vazia em uint8."
-                )
+                raise ValueError("Each frame must be a nonempty uint8 BGR image.")
 
-            if frame.shape != content.data[0].shape:
-                raise ValueError("Todos os quadros devem ter o mesmo tamanho.")
+            if expected_shape is None:
+                expected_shape = frame.shape
+            elif frame.shape != expected_shape:
+                raise ValueError("All frames must have the same size.")
 
-        path = Path(self.location)
-        codecs = {".avi": "MJPG", ".mp4": "mp4v"}
+    def dematerialize(self, reference: ArtifactReference) -> str:
+        """Save the frames and return the destination location."""
+        self.validate_frames()
+
+        path = Path(reference.location)
+        codecs = {
+            ".avi": "MJPG",
+            ".mp4": "mp4v",
+        }  # não deveria estar aqui (pensar num luga mais adequado)
         codec = codecs.get(path.suffix.lower())
 
         if codec is None:
-            raise ValueError("O destino deve ter extensão .avi ou .mp4.")
+            raise ValueError("The destination must use .avi or .mp4.")
 
-        height, width = content.data[0].shape[:2]
+        height, width = self.data[0].shape[:2]
         path.parent.mkdir(parents=True, exist_ok=True)
 
         writer = cv2.VideoWriter(
             str(path),
             cv2.VideoWriter_fourcc(*codec),
-            content.fps,
+            self.fps,
             (width, height),
         )
 
         try:
             if not writer.isOpened():
-                raise OSError(f"Não foi possível criar o vídeo: {path}")
+                raise OSError(f"Could not create the video: {path}")
 
-            for frame in content.data:
+            for frame in self.data:
                 writer.write(frame)
         finally:
             writer.release()
 
-        self.data = content.data
-        self.fps = content.fps
-        return self.location
+        return reference.location
