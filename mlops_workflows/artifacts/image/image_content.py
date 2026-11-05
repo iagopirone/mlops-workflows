@@ -1,6 +1,4 @@
-"""Represent an image reference and its content as separate objects."""
-
-from __future__ import annotations
+"""Store and save image pixel data."""
 
 from pathlib import Path
 
@@ -10,24 +8,6 @@ from pydantic import ConfigDict, field_validator
 
 from mlops_workflows.artifacts.content import ArtifactContent
 from mlops_workflows.artifacts.interface import ArtifactReference
-
-
-class ImageReference(ArtifactReference):
-    """Identify an image by its name and location."""
-
-    def materialize(self) -> ImageContent:
-        """Load the image and return its BGR pixel data."""
-        path = Path(self.location)
-
-        if not path.is_file():
-            raise FileNotFoundError(f"Image file not found: {path}")
-
-        image = cv2.imread(str(path))
-
-        if image is None:
-            raise ValueError(f"Could not read the image: {path}")
-
-        return ImageContent(data=image)
 
 
 class ImageContent(ArtifactContent):
@@ -47,7 +27,7 @@ class ImageContent(ArtifactContent):
         return value
 
     def dematerialize(self, reference: ArtifactReference) -> str:
-        """Save the pixels to the destination and return its location."""
+        """Save the pixels and return the destination location."""
         if self.data.size == 0:
             raise ValueError("Image data must not be empty.")
 
