@@ -1,92 +1,69 @@
-"""Dados e contratos para a execução de pipelines."""
+"""Define data structures and contracts for pipeline execution."""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from pydantic import BaseModel, ConfigDict, Field
 
-# DADOS
-
-
-class ArtifactContent(BaseModel):
-    """Conteúdo carregado ou produzido durante o processamento."""
-
-    data: object
-
-
-class Artifact(BaseModel, ABC):
-    """Referência de um artefato e operações sobre seu conteúdo."""
-
-    model_config = ConfigDict(strict=True, extra="forbid")
-
-    name: str = Field(min_length=1)
-    location: str = Field(min_length=1)
-
-    @abstractmethod
-    def materialize(self) -> ArtifactContent:
-        """Carrega o conteúdo."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def dematerialize(self, content: ArtifactContent) -> None:
-        """Armazena o conteúdo."""
-        raise NotImplementedError
+from mlops_workflows.artifacts.interface import ArtifactReference
 
 
 class Event(BaseModel):
-    """Pedido que inicia o processamento."""
+    """Represent a request that starts processing."""
 
     model_config = ConfigDict(strict=True, extra="forbid")
 
     pipeline_id: str = Field(min_length=1)
-    sensor_data: Artifact
+    sensor_data: ArtifactReference
     shop_id: str = Field(min_length=1)
     sensor_id: str = Field(min_length=1)
 
 
-# COMPONENTE E ESTRUTURA DO PIPELINE
-
-
 class Component(ABC):
-    """Contrato das tarefas que processam os dados."""
+    """Define the contract for tasks that process data."""
 
     @abstractmethod
-    def prepare(self, input_artifacts: list[Artifact]) -> object:
-        """Carrega e prepara as entradas."""
+    def prepare(
+        self,
+        input_artifacts: list[ArtifactReference],
+    ) -> object:
+        """Load and prepare the input data."""
         raise NotImplementedError
 
     @abstractmethod
-    def execute(self, prepared_data: object) -> list[Artifact]:
-        """Processa, armazena as saídas e retorna suas referências."""
+    def execute(
+        self,
+        prepared_data: object,
+    ) -> list[ArtifactReference]:
+        """Process data, save outputs, and return their references."""
         raise NotImplementedError
 
 
 @dataclass
 class Step:
-    """Uma etapa e suas dependências."""
+    """Represent a processing step and its dependencies."""
 
     step_name: str
     component: Component
     depends_on: list["Step"] = field(default_factory=list)
-    input_artifacts: list[Artifact] = field(default_factory=list)
-    output_artifacts: list[Artifact] = field(default_factory=list)
+    input_artifacts: list[ArtifactReference] = field(default_factory=list)
+    output_artifacts: list[ArtifactReference] = field(default_factory=list)
 
 
 @dataclass
 class Pipeline:
-    """Conjunto de etapas de um processamento."""
+    """Group the steps that define a processing workflow."""
 
     pipeline_id: str
     steps: list[Step]
 
 
-# CONSULTA E EXECUÇÃO
-
-
 class PipelineRepository(ABC):
+    """Define how pipelines are retrieved."""
+
     @abstractmethod
     def get_by_id(self, pipeline_id: str) -> Pipeline:
-        """Busca um pipeline pelo identificador."""
+        """Find a pipeline by its identifier."""
         raise NotImplementedError
 
 
@@ -97,7 +74,7 @@ class StepSelector:
         started_steps: list[Step],
         completed_steps: list[Step],
     ) -> list[Step]:
-        """Seleciona etapas não iniciadas com dependências concluídas."""
+        """Select unstarted steps whose dependencies are completed."""
         raise NotImplementedError
 
 
@@ -105,19 +82,19 @@ class ComponentExecutor:
     def execute(
         self,
         component: Component,
-        input_artifacts: list[Artifact],
-    ) -> list[Artifact]:
-        """Chama prepare() e execute() do componente."""
+        input_artifacts: list[ArtifactReference],
+    ) -> list[ArtifactReference]:
+        """Call the component's preparation and execution methods."""
         raise NotImplementedError
 
 
 class WorkflowRunner:
     def run(self, event: Event, pipeline: Pipeline) -> None:
-        """Coordena as etapas até a conclusão ou falha."""
+        """Coordinate the steps until completion or failure."""
         raise NotImplementedError
 
 
 class PipelineSelector:
     def execute(self, event: Event) -> Pipeline:
-        """Busca o pipeline, aciona o workflow e retorna o pipeline."""
+        """Find a pipeline, run its workflow, and return the pipeline."""
         raise NotImplementedError
