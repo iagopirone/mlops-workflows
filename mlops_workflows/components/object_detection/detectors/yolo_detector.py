@@ -1,5 +1,6 @@
-"""Detect blood cells using the BCCD ONNX model."""
+"""Detect objects using YOLO models exported to ONNX."""
 
+import ast
 from pathlib import Path
 
 import cv2
@@ -7,21 +8,23 @@ import numpy as np
 import onnxruntime as ort
 from pydantic import BaseModel, Field
 
-from mlops_workflows.components.detection import Detection
+from mlops_workflows.artifacts.detection.detection import Detection
+from mlops_workflows.components.object_detection.object_detector import ObjectDetector
 
 
-class CellDetectorConfig(BaseModel):
-    """Define the settings used by the blood cell detector."""
+class YoloDetectorConfig(BaseModel):
+    """Define the settings used by the YOLO detector."""
 
     model_path: str = Field(min_length=1)
+    class_names: list[str] | None = Field(default=None, min_length=1)
     confidence_threshold: float = Field(default=0.25, ge=0.0, le=1.0)
     iou_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
 
 
-class CellDetector:
-    """Run blood cell detection using the BCCD ONNX model."""
+class YoloDetector(ObjectDetector):
+    """Run object detection using a YOLO ONNX model."""
 
-    def __init__(self, config: CellDetectorConfig):
+    def __init__(self, config: YoloDetectorConfig):
         self.config = config
 
         model_path = Path(config.model_path)
@@ -38,9 +41,57 @@ class CellDetector:
             providers=["CPUExecutionProvider"],
         )
 
-        self.input_name = self.session.get_inputs()[0].name
-        self.class_names = ("RBC", "WBC", "Platelets")
-        self.image_size = 640
+        input_info = self.session.get_inputs()[0]
+        self.input_name = input_info.name
+
+        shape = input_info.shape
+
+        if len(shape) != 4 or shape[0] != 1 or shape[1] != 3:
+            raise ValueError("Expected a YOLO model with input shape [1, 3, H, W].")
+
+        height, width = shape[2], shape[3]
+
+        if not all(isinstance(value, int) and value > 0 for value in (height, width)):
+            raise ValueError("The model must have fixed input dimensions.")
+
+        self.input_height = height
+        self.input_width = width
+
+        if config.class_names is not None:
+            names = config.class_names
+        else:
+            metadata = self.session.get_modelmeta().custom_metadata_map
+            raw_names = metadata.get("names")
+
+            if raw_names is None:
+                raise ValueError(
+                    "Model metadata does not contain class names. "
+                    "Provide class_names in the configuration."
+                )
+
+            try:
+                parsed_names = ast.literal_eval(raw_names)
+            except (ValueError, SyntaxError) as error:
+                raise ValueError("Invalid class names metadata.") from error
+
+            if isinstance(parsed_names, dict):
+                if set(parsed_names) != set(range(len(parsed_names))):
+                    raise ValueError("Class IDs must be consecutive from zero.")
+
+                names = [parsed_names[i] for i in range(len(parsed_names))]
+
+            elif isinstance(parsed_names, (list, tuple)):
+                names = list(parsed_names)
+
+            else:
+                raise ValueError("Invalid class names metadata.")
+
+        if not names or any(
+            not isinstance(name, str) or not name.strip() for name in names
+        ):
+            raise ValueError("Class names must be nonempty strings.")
+
+        self.class_names = tuple(names)
 
     def _preprocess(
         self,
@@ -59,7 +110,11 @@ class CellDetector:
             raise ValueError("The image must be a nonempty uint8 BGR image.")
 
         height, width = image.shape[:2]
-        scale = min(self.image_size / height, self.image_size / width)
+
+        scale = min(
+            self.input_height / height,
+            self.input_width / width,
+        )
 
         resized_width = max(1, round(width * scale))
         resized_height = max(1, round(height * scale))
@@ -67,13 +122,13 @@ class CellDetector:
         resized = cv2.resize(image, (resized_width, resized_height))
 
         canvas = np.full(
-            (self.image_size, self.image_size, 3),
+            (self.input_height, self.input_width, 3),
             114,
             dtype=np.uint8,
         )
 
-        padding_x = (self.image_size - resized_width) // 2
-        padding_y = (self.image_size - resized_height) // 2
+        padding_x = (self.input_width - resized_width) // 2
+        padding_y = (self.input_height - resized_height) // 2
 
         canvas[
             padding_y : padding_y + resized_height,
@@ -88,7 +143,7 @@ class CellDetector:
         return np.ascontiguousarray(batch), scale, padding_x, padding_y
 
     def detect(self, image: np.ndarray) -> list[Detection]:
-        """Run inference and return filtered blood cell detections."""
+        """Run inference and return filtered object detections."""
         batch, scale, padding_x, padding_y = self._preprocess(image)
 
         output = self.session.run(
@@ -96,7 +151,30 @@ class CellDetector:
             {self.input_name: batch},
         )[0]
 
+        expected_channels = 4 + len(self.class_names)
+
+        if (
+            not isinstance(output, np.ndarray)
+            or output.ndim != 3
+            or output.shape[0] != 1
+            or output.shape[1] != expected_channels
+        ):
+            raise ValueError(
+                "Unsupported YOLO output shape. "
+                f"Expected [1, {expected_channels}, N], "
+                f"got {getattr(output, 'shape', None)}."
+            )
+
+        if output.shape[2] == 0:
+            return []
+
         predictions = output[0].T
+
+        # Discard predictions containing NaN or infinite values.
+        predictions = predictions[np.isfinite(predictions).all(axis=1)]
+
+        if len(predictions) == 0:
+            return []
 
         boxes = predictions[:, :4]
         scores = predictions[:, 4:]
@@ -128,9 +206,26 @@ class CellDetector:
         corners = corners[valid]
         class_ids = class_ids[valid]
         confidences = confidences[valid]
-        detections = []
 
-        for index in self._nms(corners, confidences):
+        detections = []
+        selected_indices = []
+
+        for class_id in np.unique(class_ids):
+            indices = np.where(class_ids == class_id)[0]
+
+            selected = self._nms(
+                corners[indices],
+                confidences[indices],
+            )
+
+            selected_indices.extend(indices[selected])
+
+        selected_indices.sort(
+            key=lambda index: confidences[index],
+            reverse=True,
+        )
+
+        for index in selected_indices:
             detection = Detection(
                 cls=self.class_names[int(class_ids[index])],
                 conf=float(confidences[index]),
