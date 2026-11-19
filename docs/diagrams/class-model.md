@@ -1,3 +1,27 @@
+---
+type: Diagram
+title: "Modelo de classes (ADR 001)"
+description: Classes propostas do orquestrador, artefatos e componentes, conforme o ADR 001.
+tags:
+- diagram
+- adr
+- classes
+status: draft
+generated:
+  by: human:iago.pirone
+  at: "2026-11-18T08:29:00-03:00"
+evidence_basis: [proposal]
+sources:
+- id: adr-001
+  resource: docs/diagrams/02-class-diagram.mmd, commit 6a30f8b (15/10/2026)
+  title: Diagrama original do ADR 001
+---
+
+# Modelo de classes (ADR 001)
+
+> **Origem:** `docs/diagrams/02-class-diagram.mmd` (commit `6a30f8b`), migrado em 18/11/2026 sem alterar o Mermaid. Representa a arquitetura **proposta** no [ADR 001](../adr/001-workflow-architecture.md); o orquestrador **não está implementado** (`domain.py` só tem esqueletos). Para o fluxo realmente implementado, veja [pipeline atual](current-pipeline.md).
+
+```mermaid
 classDiagram
     direction TB
     class WorkflowRunner {
@@ -60,3 +84,4 @@ classDiagram
     Step --> "1..*" Artifact : output_artifacts
     ComponentExecutor ..> Component : utiliza
     Component ..> Artifact : utiliza
+```
