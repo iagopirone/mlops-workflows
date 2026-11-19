@@ -1,3 +1,27 @@
+---
+type: ADR
+title: "ADR 001 — Estrutura genérica para a inferência no ciclo de MLOps"
+description: Decisão arquitetural original (proposta em 15/10/2026) do workflow genérico de inferência, com nota de divergência em relação ao código atual.
+tags:
+- adr
+- architecture
+- workflow
+status: draft
+generated:
+  by: human:iago.pirone
+  at: "2026-11-18T08:28:51-03:00"
+evidence_basis: [proposal, verified]
+sources:
+- id: adr-original
+  resource: docs/ADR-001-workflow-architecture.md, commit 6a30f8b (15/10/2026)
+  title: Texto original do ADR, preservado abaixo sem alterações
+- id: local-checkout
+  resource: Checkout local em feature/integracao-mirage (HEAD d0fb7f2 + alterações não commitadas), inspecionado em 17/11/2026
+  title: Código, testes e execuções locais
+---
+
+> **Origem:** este arquivo era `docs/ADR-001-workflow-architecture.md` (commit `6a30f8b`). Foi movido em 18/11/2026 na reorganização OKF ([plano](../plans/2026-11-18-plan-docs-restructure.md)). O texto original segue **sem alterações** até a seção "Nota de 17/11/2026". Os três diagramas Mermaid também existem como documentos vivos em [diagramas](../diagrams/index.md).
+
 # ADR 001 — Estrutura genérica para a inferência no ciclo de MLOps
 
 > Documento de planejamento e decisão de arquitetura, em fase de refinamento.
@@ -365,3 +389,45 @@ Os seguintes contratos e escolhas precisam ser alinhados durante a implementaç�
 O diagrama de sequência registra saídas por execução. Isso não deve ser entendido
 como autorização para alterar objetos Step compartilhados por pedidos simultâneos.
 O isolamento dos resultados será detalhado na implementação.
+
+---
+
+## Nota de 17/11/2026: estado do código e recomendações
+
+*Antes em `architecture/adr.md` do bundle antigo. Conteúdo preservado.*
+
+### Fonte arquitetural
+
+O snapshot do repositório contém `docs/ADR-001-workflow-architecture.md`, título **“Estrutura genérica para a inferência no ciclo de MLOps”**, e três diagramas Mermaid. O ADR apresenta contexto, problema, limites, responsabilidades, consequências esperadas e decisões pendentes.
+
+A arquitetura proposta contempla:
+
+- evento de entrada e escolha de pipeline;
+- repositório de pipelines e seleção conforme identificador;
+- etapas (`Step`) e seus pré-requisitos;
+- seleção de próxima etapa pronta;
+- busca e materialização de artefatos;
+- preparação e execução de componentes;
+- registro de saídas intermediárias/finais;
+- etapa de finalização e entrega de resultados.
+
+### Distinção fundamental
+
+**Desenho de arquitetura não comprova implementação.** O snapshot confirma as interfaces de componente/artefato, mas não comprova execução funcional de `WorkflowRunner`, `StepSelector`, `PipelineRepository`, `PipelineSelector`, `ComponentExecutor` ou uma plataforma de orquestração completa.
+
+Também há uma diferença entre o diagrama antigo e o contrato Python atual: o ADR ilustra um `Artifact` unificado com métodos de ida/volta, enquanto o código divide o comportamento entre `ArtifactReference.materialize()` e `ArtifactContent.dematerialize(reference)`.
+
+### Estado no código (verificado em 17/11/2026)
+
+- `mlops_workflows/domain.py` define `Event`, `Step`, `Pipeline` e `PipelineRepository`.
+- `StepSelector`, `ComponentExecutor`, `WorkflowRunner` e `PipelineSelector` existem só como esqueletos que lançam `NotImplementedError`. **O orquestrador não está implementado.**
+- Os componentes são executados manualmente, chamando `prepare()` e depois `execute()`, em testes e scripts.
+
+### Recomendações para atualização do ADR
+
+1. Modelar `ArtifactReference` e `ArtifactContent` separadamente no diagrama de classes.
+2. Mostrar `Component.prepare()` e `Component.execute()` com seus tipos reais/pretendidos.
+3. Explicitar `ObjectDetector`, `ObjectDetectionComponent`, `DetectionVisualizationComponent`, `VisualQuestionAnswerer` e `VisualQuestionAnsweringComponent`.
+4. Diferenciar etapas já implementadas dos módulos somente conceituais.
+
+Origem: `docs/ADR-001-workflow-architecture.md` do snapshot `666fbb5`.
