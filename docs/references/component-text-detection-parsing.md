@@ -49,7 +49,7 @@ Esse encadeamento foi verificado com um `FakeAnswerer` em `tests/integration/com
 | `tests/unit/components/text_detection_parsing/test_text_detection_parser.py` | **Novo**, 55 testes (parametrizados); 99 após as correções P1–P3 |
 | `tests/unit/components/text_detection_parsing/test_text_detection_parsing_component.py` | **Novo**, 7 testes; 10 após as correções P1–P3 |
 | `tests/integration/components/text_detection_parsing/test_text_detection_pipeline.py` | **Novo**, 2 testes |
-| `tests/unit/artifacts/detection/test_detection_artifacts.py` | +4 testes (`conf` nulo, obrigatório, intervalo) |
+| `tests/unit/artifacts/detection/test_detection_artifacts.py` (desde 19/11/2026, `test_detection.py` e `test_detection_reference.py`) | +4 testes (`conf` nulo, obrigatório, intervalo) |
 | `tests/unit/components/detection_visualization/test_detection_visualization_component.py` | +1 teste (desenho sem confiança) |
 
 Não foi adicionada nenhuma dependência: só `json`, `typing` e Pydantic, que já estavam no projeto.

@@ -4,6 +4,15 @@ Entradas da mais recente para a mais antiga. Datas absolutas. Formato e regras e
 
 ## 2026-11-19
 
+**Testes de artefatos separados em content e reference** (aprovado pelo usuário)
+
+- Cada arquivo de teste de artefato foi dividido para espelhar o código: `test_<tipo>_content.py` e `test_<tipo>_reference.py`, nos unitários e na integração (agora em `tests/integration/artifacts/<tipo>/`). `Detection` e o modelo `ExecutionReport` têm arquivo próprio.
+- Ida e volta fica no arquivo de reference (decisão do usuário).
+- Os 69 testes foram movidos sem mudar o corpo (conferido comparando a árvore sintática de cada função com a versão commitada); total inalterado: **292 passed, 1 skipped**.
+- `detection/` não tem `test_detection_content.py`: nenhum teste exercita o `DetectionContent` isoladamente.
+- Os construtores do relatório (`report()`, `run()`, `evaluation()`, `record()` e constantes) ficaram duplicados em `test_execution_report.py` e `test_execution_report_reference.py`: sem `__init__.py` nos testes, compartilhar exigiria transformá-los em fixtures e alterar os testes.
+- Convenção registrada na [suíte de testes](references/test-suite.md) e no playbook [criar artefato](playbooks/create-artifact.md).
+
 **Commits, PR e Jira** (autorizados pelo usuário)
 
 - Trabalho da branch dividido em 12 commits por responsabilidade; ordem e motivo no [plano de commits](plans/2026-11-17-plan-commits.md#atualização-de-19112026-execução-autorizada).

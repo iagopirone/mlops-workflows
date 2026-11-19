@@ -1,7 +1,6 @@
-"""Test text artifact loading and persistence."""
+"""Test TextReference loading and round trips."""
 
 import pytest
-from pydantic import ValidationError
 
 from mlops_workflows.artifacts.text.text_content import TextContent
 from mlops_workflows.artifacts.text.text_reference import TextReference
@@ -35,18 +34,6 @@ def test_empty_text_round_trip(tmp_path):
     assert reference.materialize().data == ""
 
 
-def test_dematerialize_creates_parent_directory(tmp_path):
-    """Create parent directories when saving text."""
-    reference = TextReference(
-        name="response",
-        location=str(tmp_path / "nested" / "response.txt"),
-    )
-
-    TextContent(data="Model response").dematerialize(reference)
-
-    assert reference.materialize().data == "Model response"
-
-
 def test_materialize_rejects_missing_file(tmp_path):
     """Reject nonexistent text files."""
     reference = TextReference(
@@ -67,12 +54,6 @@ def test_materialize_rejects_directory(tmp_path):
 
     with pytest.raises(FileNotFoundError):
         reference.materialize()
-
-
-def test_text_content_rejects_non_string():
-    """Require text content to contain a string."""
-    with pytest.raises(ValidationError):
-        TextContent(data=123)
 
 
 def test_materialize_rejects_invalid_encoding(tmp_path):

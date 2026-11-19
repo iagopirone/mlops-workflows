@@ -1,4 +1,4 @@
-"""Test isolated video behavior without reading or writing real videos."""
+"""Test isolated VideoContent write behavior without real files."""
 
 from pathlib import Path
 
@@ -63,18 +63,3 @@ def test_dematerialize_reports_writer_failure(
         content.dematerialize(destination)
 
     assert writer.released
-
-
-def test_reference_json_contains_only_reference_fields():
-    """Serialize and reconstruct a reference without video content."""
-    reference = VideoReference(name="video", location="input.avi")
-
-    message = reference.model_dump_json()
-    recovered = VideoReference.model_validate_json(message)
-
-    assert reference.model_dump() == {
-        "name": "video",
-        "location": "input.avi",
-    }
-    assert recovered == reference
-    assert recovered is not reference
