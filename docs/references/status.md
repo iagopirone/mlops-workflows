@@ -69,7 +69,7 @@ Legenda: **Verificado** = inspecionado no cÃ³digo e/ou executado em 17/11/2026 Â
 | `tests/unit/artifacts/image/test_image_content.py` / `test_image_reference.py` | 9 / 7 |
 | `tests/unit/artifacts/video/test_video_content.py` / `test_video_reference.py` | 2 / 1 |
 | `tests/unit/artifacts/text/test_text_content.py` / `test_text_reference.py` | 2 / 5 |
-| `tests/unit/artifacts/detection/test_detection.py` / `test_detection_reference.py` | 3 / 7 |
+| `tests/unit/artifacts/detection/test_detection.py` / `test_detection_content.py` / `test_detection_reference.py` | 3 / 17 / 7 |
 | `tests/unit/artifacts/report/test_execution_report.py` / `_content.py` / `_reference.py` | 34 / 1 / 5 |
 | `tests/unit/components/object_detection/detectors/test_yolo_detector.py` | 32 |
 | `tests/unit/components/object_detection/test_object_detection_component.py` | 6 |

@@ -1,130 +1,21 @@
 """Test the ExecutionReport model and its validation rules."""
 
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
 
 from mlops_workflows.artifacts.report.execution_report import (
     ArtifactRecord,
-    Evaluation,
-    ExecutionReport,
     InferenceCheck,
     ModelIdentity,
     PipelineRun,
 )
 
-HASH = "a" * 64
 
-
-YOLO = ModelIdentity(
-    key="yolo",
-    kind="onnx_object_detector",
-    name="best.onnx",
-    source="/models/best.onnx",
-    revision="sha256:" + "0" * 64,
-    details={"confidence_threshold": "0.25"},
-)
-
-
-MIRAGE = ModelIdentity(
-    key="mirage",
-    kind="mirage_official",
-    name="tsunghanwu/mirage-llama3.1-8.3B",
-    source="/ckpt/mirage-llama3.1-8.3B",
-    revision="100ea29f5fb9dbd35d52390075abd9f60b225478",
-)
-
-
-PASSED = [InferenceCheck(name="gpu_memory_loaded", passed=True, detail="20100 MiB")]
-
-
-def record(kind="image", name="image", location="in.jpg") -> ArtifactRecord:
-    return ArtifactRecord(kind=kind, name=name, location=location, sha256=HASH)
-
-
-def run(**changes) -> PipelineRun:
-    values = {
-        "pipeline": "yolo",
-        "experiment": "detection",
-        "model_key": "yolo",
-        "image_id": "BloodImage_00001",
-        "status": "succeeded",
-        "class_source": "model",
-        "error": None,
-        "detection_count": 3,
-        "duration_seconds": 0.5,
-        "inputs": [record()],
-        "outputs": [
-            record("detection", "detections", "d.json"),
-            record("image", "annotated", "a.png"),
-        ],
-        "evidence": [],
-        "inference_checks": PASSED,
-    }
-    values.update(changes)
-    return PipelineRun(**values)
-
-
-def evaluation(**changes) -> Evaluation:
-    values = {
-        "pipeline": "yolo",
-        "experiment": "detection",
-        "ground_truth": "annotations.json",
-        "iou_threshold": 0.5,
-        "coordinate_format": "pixel",
-        "class_source": "model",
-        "report": record("file", "yolo-eval", "yolo-eval.json"),
-        "summary": {"true_positives": 1, "precision": 0.5, "recall": None},
-        "per_class": {"WBC": {"true_positives": 1, "precision": 1.0}},
-    }
-    values.update(changes)
-    return Evaluation(**values)
-
-
-def report(**changes) -> ExecutionReport:
-    values = {
-        "run_id": "2026-11-18-e2e",
-        "created_at": datetime(
-            2026, 11, 18, 15, 0, tzinfo=timezone(timedelta(hours=-3))
-        ),
-        "environment": {"python": "3.12.14"},
-        "inputs": [record("file", "annotations", "annotations.json")],
-        "criteria": {"iou_threshold": 0.5, "min_valid_response_rate": 0.8},
-        "models": [YOLO, MIRAGE],
-        "pipelines": [
-            run(),
-            run(
-                pipeline="mirage",
-                experiment="json_prompt",
-                model_key="mirage",
-                status="invalid_response",
-                error="The response is not valid JSON",
-                detection_count=None,
-                outputs=[],
-                evidence=[record("file", "run", "run.json")],
-            ),
-        ],
-        "evaluations": [evaluation()],
-        "deviations": ["torchvision 0.16.2 instead of 0.15.2"],
-    }
-    values.update(changes)
-    return ExecutionReport(**values)
-
-
-QWEN = ModelIdentity(
-    key="qwen3vl",
-    kind="llamacpp_gguf",
-    name="Qwen/Qwen3-VL-2B-Instruct-GGUF Q4_K_M",
-    source="experiments/qwen3vl/models/Qwen3VL-2B-Instruct-Q4_K_M.gguf",
-    revision="52d6c8ffea26cc873ac5ad116f8631268d7eb503",
-    details={"llama_cpp_commit": "6f1e6543704bc5b080c7a98e7b6f707b31f6ed51"},
-)
-
-
-def test_report_requires_at_least_one_model():
+def test_report_requires_at_least_one_model(make_report):
     with pytest.raises(ValidationError, match="at least 1"):
-        report(models=[], pipelines=[])
+        make_report(models=[], pipelines=[])
 
 
 def test_simulated_model_kind_is_rejected():
@@ -139,8 +30,8 @@ def test_simulated_model_kind_is_rejected():
 
 
 @pytest.mark.parametrize("field", ["key", "name", "source", "revision"])
-def test_model_identity_fields_must_not_be_empty(field):
-    values = YOLO.model_dump() | {field: ""}
+def test_model_identity_fields_must_not_be_empty(field, yolo_model):
+    values = yolo_model.model_dump() | {field: ""}
 
     with pytest.raises(ValidationError):
         ModelIdentity(**values)
@@ -152,27 +43,27 @@ def test_records_need_a_sha256(value):
         ArtifactRecord(kind="file", name="x", location="x", sha256=value)
 
 
-def test_model_answer_needs_inference_checks():
+def test_model_answer_needs_inference_checks(make_run):
     with pytest.raises(ValidationError, match="real-inference checks"):
-        run(inference_checks=[])
+        make_run(inference_checks=[])
 
 
 @pytest.mark.parametrize("status", ["succeeded", "invalid_response"])
-def test_model_answer_needs_all_checks_passed(status):
+def test_model_answer_needs_all_checks_passed(status, make_run, passed_checks):
     failed = [
-        *PASSED,
+        *passed_checks,
         InferenceCheck(name="official_code_revision", passed=False, detail="dirty"),
     ]
     extra = {} if status == "succeeded" else {"error": "x", "detection_count": None}
 
     with pytest.raises(ValidationError, match="real-inference checks"):
-        run(status=status, inference_checks=failed, **extra)
+        make_run(status=status, inference_checks=failed, **extra)
 
 
-def test_infrastructure_failure_may_have_failed_checks():
+def test_infrastructure_failure_may_have_failed_checks(make_run):
     failed = [InferenceCheck(name="gpu_memory_loaded", passed=False, detail="none")]
 
-    result = run(
+    result = make_run(
         status="infrastructure_failure",
         error="Insufficient evidence of real inference",
         detection_count=None,
@@ -182,35 +73,35 @@ def test_infrastructure_failure_may_have_failed_checks():
     assert result.inference_checks[0].passed is False
 
 
-def test_class_source_is_required():
-    values = run().model_dump(exclude={"class_source"})
+def test_class_source_is_required(make_run):
+    values = make_run().model_dump(exclude={"class_source"})
 
     with pytest.raises(ValidationError):
         PipelineRun(**values)
 
 
-def test_pipeline_must_use_a_known_model():
+def test_pipeline_must_use_a_known_model(make_run, make_report):
     with pytest.raises(ValidationError, match="Unknown model key"):
-        report(pipelines=[run(model_key="other")])
+        make_report(pipelines=[make_run(model_key="other")])
 
 
-def test_pipeline_must_use_a_model_of_its_kind():
+def test_pipeline_must_use_a_model_of_its_kind(make_run, make_report):
     with pytest.raises(ValidationError, match="cannot use"):
-        report(pipelines=[run(pipeline="mirage", model_key="yolo")])
+        make_report(pipelines=[make_run(pipeline="mirage", model_key="yolo")])
 
 
-def test_model_keys_must_be_unique():
+def test_model_keys_must_be_unique(make_report, yolo_model):
     with pytest.raises(ValidationError, match="unique"):
-        report(models=[YOLO, YOLO])
+        make_report(models=[yolo_model, yolo_model])
 
 
-def test_created_at_needs_timezone():
+def test_created_at_needs_timezone(make_report):
     with pytest.raises(ValidationError, match="timezone"):
-        report(created_at=datetime(2026, 11, 18, 15, 0))
+        make_report(created_at=datetime(2026, 11, 18, 15, 0))
 
 
-def test_utc_timestamp_is_accepted():
-    assert report(created_at=datetime(2026, 11, 18, tzinfo=UTC)).created_at.tzinfo
+def test_utc_timestamp_is_accepted(make_report):
+    assert make_report(created_at=datetime(2026, 11, 18, tzinfo=UTC)).created_at.tzinfo
 
 
 @pytest.mark.parametrize(
@@ -223,18 +114,20 @@ def test_utc_timestamp_is_accepted():
         {"status": "infrastructure_failure", "error": "", "detection_count": None},
     ],
 )
-def test_status_consistency(changes):
+def test_status_consistency(changes, make_run):
     with pytest.raises(ValidationError):
-        run(**changes)
+        make_run(**changes)
 
 
-def test_failure_statuses_are_distinct():
-    infra = run(
+def test_failure_statuses_are_distinct(make_run):
+    infra = make_run(
         status="infrastructure_failure",
         error="CUDA out of memory",
         detection_count=None,
     )
-    invalid = run(status="invalid_response", error="not JSON", detection_count=None)
+    invalid = make_run(
+        status="invalid_response", error="not JSON", detection_count=None
+    )
 
     assert {infra.status, invalid.status} == {
         "infrastructure_failure",
@@ -242,31 +135,34 @@ def test_failure_statuses_are_distinct():
     }
 
 
-def test_extra_fields_are_rejected():
+def test_extra_fields_are_rejected(sha256):
     with pytest.raises(ValidationError):
-        ArtifactRecord(kind="image", name="a", location="a.png", sha256=HASH, x=1)
+        ArtifactRecord(kind="image", name="a", location="a.png", sha256=sha256, x=1)
 
 
 @pytest.mark.parametrize("threshold", [0, 1.5])
-def test_iou_threshold_range(threshold):
+def test_iou_threshold_range(threshold, make_evaluation):
     with pytest.raises(ValidationError):
-        evaluation(iou_threshold=threshold)
+        make_evaluation(iou_threshold=threshold)
 
 
-def test_qwen_pipeline_needs_a_llamacpp_model():
+def test_qwen_pipeline_needs_a_llamacpp_model(
+    make_run, make_report, yolo_model, qwen_model
+):
     with pytest.raises(ValidationError, match="cannot use"):
-        report(
-            models=[YOLO, QWEN], pipelines=[run(pipeline="qwen3vl", model_key="yolo")]
+        make_report(
+            models=[yolo_model, qwen_model],
+            pipelines=[make_run(pipeline="qwen3vl", model_key="yolo")],
         )
 
 
-def test_qwen_answer_still_needs_inference_checks():
+def test_qwen_answer_still_needs_inference_checks(make_run):
     with pytest.raises(ValidationError, match="real-inference checks"):
-        run(pipeline="qwen3vl", model_key="qwen3vl", inference_checks=[])
+        make_run(pipeline="qwen3vl", model_key="qwen3vl", inference_checks=[])
 
 
-def test_evaluation_defaults_keep_previous_reports_valid():
-    result = evaluation()
+def test_evaluation_defaults_keep_previous_reports_valid(make_evaluation):
+    result = make_evaluation()
 
     assert (result.class_aware, result.subset, result.confusion) == (
         True,
@@ -275,10 +171,12 @@ def test_evaluation_defaults_keep_previous_reports_valid():
     )
 
 
-def test_evaluation_rejects_unknown_subset():
+def test_evaluation_rejects_unknown_subset(make_evaluation):
     with pytest.raises(ValidationError):
-        evaluation(subset="best_images")
+        make_evaluation(subset="best_images")
 
 
-def test_completed_inferences_subset_is_accepted():
-    assert evaluation(subset="completed_inferences").subset == "completed_inferences"
+def test_completed_inferences_subset_is_accepted(make_evaluation):
+    assert (
+        make_evaluation(subset="completed_inferences").subset == "completed_inferences"
+    )

@@ -68,4 +68,4 @@ Foi discutido mover `Detection` para `detection_content.py`. A mudança **não f
   - o fluxo real foi revalidado (17 detecções idênticas).
 - **Visualizador:** sem confiança, o rótulo mostra só `cls`.
 
-Testes em `tests/unit/artifacts/detection/`: `test_detection.py` (3, modelo `Detection`) e `test_detection_reference.py` (7, leitura e ida e volta), separados em 19/11/2026. Veja [interpretação de texto](component-text-detection-parsing.md).
+Testes em `tests/unit/artifacts/detection/`: `test_detection.py` (3, modelo `Detection`), `test_detection_content.py` (17, validação de `data` e gravação do JSON, lido direto com `json`, sem `materialize()`) e `test_detection_reference.py` (7, leitura e ida e volta), separados em 19/11/2026. Veja [interpretação de texto](component-text-detection-parsing.md).
