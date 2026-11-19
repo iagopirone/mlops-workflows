@@ -1,0 +1,1 @@
+Describe the main objects visible in this microscopy image. Explain what you can identify and what remains uncertain. Do not invent exact counts, positions, or confidence scores.
