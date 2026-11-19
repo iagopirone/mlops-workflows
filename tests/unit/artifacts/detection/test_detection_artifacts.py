@@ -96,3 +96,35 @@ def test_detection_reference_rejects_invalid_data(
 
     with pytest.raises((TypeError, ValueError, ValidationError)):
         reference.materialize()
+
+
+def test_detection_without_confidence_round_trip(tmp_path):
+    """Save an unknown confidence as JSON null and load it back as None."""
+    reference = DetectionReference(
+        name="text_detections",
+        location=str(tmp_path / "text_detections.json"),
+    )
+    content = DetectionContent(
+        data=[Detection(cls="WBC", conf=None, box=[1, 2, 3, 4])],
+    )
+
+    content.dematerialize(reference)
+
+    saved = json.loads((tmp_path / "text_detections.json").read_text("utf-8"))
+    restored = reference.materialize()
+
+    assert saved == [{"cls": "WBC", "conf": None, "box": [1.0, 2.0, 3.0, 4.0]}]
+    assert restored.data[0].conf is None
+
+
+def test_detection_requires_explicit_confidence():
+    """Require conf to be given, even when it is None."""
+    with pytest.raises(ValidationError):
+        Detection(cls="WBC", box=[1, 2, 3, 4])
+
+
+@pytest.mark.parametrize("conf", [-0.01, 1.01])
+def test_detection_rejects_confidence_out_of_range(conf):
+    """Keep validating numeric confidence values."""
+    with pytest.raises(ValidationError):
+        Detection(cls="WBC", conf=conf, box=[1, 2, 3, 4])
