@@ -1,0 +1,6 @@
+Experimental spatial-localization task, not a validated detection benchmark.
+For the objects you can localize in this microscopy image, return ONLY a JSON array with the shape:
+[{"cls": "RBC", "box": [0.10, 0.20, 0.30, 0.40]}]
+The example numbers above illustrate the schema; do NOT copy them into your answer.
+Use labels RBC, WBC, or Platelets only if visually supported. For each box, use [x1, y1, x2, y2], with coordinates between 0 and 1 relative to the entire square-padded model input, including padding. Do not invent a confidence score.
+If you cannot confidently localize objects, respond with an empty JSON array: []. Do not guess coordinates.

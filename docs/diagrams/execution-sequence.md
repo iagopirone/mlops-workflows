@@ -1,0 +1,105 @@
+---
+type: Diagram
+title: "Sequência de execução (ADR 001)"
+description: Sequência proposta entre coordenação, seleção de etapas e componentes, conforme o ADR 001.
+tags:
+- diagram
+- adr
+- sequence
+status: draft
+generated:
+  by: human:iago.pirone
+  at: "2026-11-18T08:29:00-03:00"
+evidence_basis: [proposal]
+sources:
+- id: adr-001
+  resource: docs/diagrams/03-sequence-diagram.mmd, commit 6a30f8b (15/10/2026)
+  title: Diagrama original do ADR 001
+---
+
+# Sequência de execução (ADR 001)
+
+> **Origem:** `docs/diagrams/03-sequence-diagram.mmd` (commit `6a30f8b`), migrado em 18/11/2026 sem alterar o Mermaid. Representa a arquitetura **proposta** no [ADR 001](../adr/001-workflow-architecture.md); o orquestrador **não está implementado** (`domain.py` só tem esqueletos). Para o fluxo realmente implementado, veja [pipeline atual](current-pipeline.md).
+
+```mermaid
+%%{init: {"theme": "neutral", "sequence": {"mirrorActors": false}}}%%
+sequenceDiagram
+    actor Caller as Solicitante
+
+    box rgb(225,238,255) Máquina de coordenação
+        participant PS as selector:PipelineSelector
+        participant PR as repository:PipelineRepository
+        participant WR as runner:WorkflowRunner
+        participant SS as stepSelector:StepSelector
+    end
+
+    box rgb(255,230,230) Máquina de processamento
+        participant CE as executor:ComponentExecutor
+        participant C as component:Component
+        participant AI as input:Artifact
+        participant AO as output:Artifact
+        participant IC as inputContent:ArtifactContent
+        participant OC as outputContent:ArtifactContent
+    end
+
+    Note over Caller,OC: Execução sequencial com pipeline encontrado.<br/>Comunicação, processamento e armazenamento bem-sucedidos.
+    Note over AI,OC: A criação dos objetos é descrita nas notas.<br/>Seu instante não é representado pelas linhas de vida.
+
+    Caller->>PS: execute(event)
+    PS->>PR: get_by_id(event.pipeline_id)
+    PR-->>PS: pipeline
+    PS->>WR: run(event, pipeline)
+
+    Note over WR: Inicia started_steps e completed_steps vazios.<br/>Disponibiliza a referência event.sensor_data.<br/>Mantém andamento e saídas separados por execução.
+
+    loop enquanto houver etapas pendentes e não houver bloqueio
+        WR->>SS: execute(pipeline, started_steps, completed_steps)
+        Note over SS: Seleciona etapas não iniciadas<br/>com todas as dependências concluídas.
+        SS-->>WR: ready_steps
+
+        alt existe etapa pronta
+            Note over WR: Escolhe uma etapa, resolve as referências de entrada<br/>e a adiciona a started_steps.
+            Note over WR,CE: Comunicação entre máquinas. Protocolo a definir.<br/>O pedido identifica execução, etapa e componente<br/>e contém as referências dos artefatos de entrada.
+            WR->>CE: Solicitar execução da etapa
+            Note over WR: Aguarda a resposta antes de selecionar outra etapa.
+            Note over CE: Identifica o componente solicitado<br/>e disponibiliza os objetos Artifact a partir das referências.
+            CE->>C: prepare(input_artifacts)
+
+            loop para cada artefato de entrada necessário
+                C->>AI: materialize()
+                Note over AI,IC: Obtém os dados de uma localização acessível<br/>à máquina de processamento e cria ArtifactContent.
+                AI-->>C: inputContent
+            end
+
+            Note over C,IC: O componente prepara os dados de entrada.
+            C-->>CE: prepared_data
+            CE->>C: execute(prepared_data)
+
+            loop para cada saída produzida
+                Note over C,OC: O componente cria um ArtifactContent<br/>com os dados produzidos.
+                Note over C,AO: Cria o Artifact de saída<br/>com name e location.
+                C->>AO: dematerialize(outputContent)
+                Note over AO,OC: Armazena os dados contidos em outputContent.
+                AO-->>C: confirmação
+            end
+
+            C-->>CE: output_artifacts
+            Note over CE: Prepara a resposta identificando a execução e a etapa.<br/>Envia referências das saídas, sem seus conteúdos.
+            CE-->>WR: Conclusão da etapa e referências das saídas
+            Note over WR: Associa a resposta à execução e à etapa.<br/>Guarda as referências das saídas<br/>e adiciona a etapa a completed_steps.
+
+        else nenhuma etapa pronta
+            Note over WR: Marca bloqueio: há etapas pendentes,<br/>mas nenhuma pode executar.<br/>Neste cenário, não há etapas em andamento.
+        end
+    end
+
+    Note over WR: A finalização participa do mesmo ciclo.<br/>Suas dependências garantem que seja a última etapa.
+
+    alt todas as etapas obrigatórias concluídas
+        WR-->>PS: conclusão
+        PS-->>Caller: pipeline
+    else execução bloqueada
+        WR-->>PS: falha
+        PS-->>Caller: falha
+    end
+```

@@ -1,0 +1,5 @@
+# Isolated environment, downloaded model files and run outputs stay out of Git.
+.venv/
+models/
+outputs/
+__pycache__/
