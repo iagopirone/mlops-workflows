@@ -36,7 +36,7 @@ sources:
 
 ## Testes (verificados em 17/11/2026)
 
-`tests/unit/artifacts/text/test_text.py`, 7 passed:
+`tests/unit/artifacts/text/test_text_content.py` e `test_text_reference.py` (separados em 19/11/2026), 7 passed:
 - round-trip com Unicode;
 - texto vazio;
 - diretório pai;

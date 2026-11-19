@@ -1,4 +1,4 @@
-"""Test the execution report artifact."""
+"""Test the ExecutionReport model and its validation rules."""
 
 from datetime import UTC, datetime, timedelta, timezone
 
@@ -13,14 +13,10 @@ from mlops_workflows.artifacts.report.execution_report import (
     ModelIdentity,
     PipelineRun,
 )
-from mlops_workflows.artifacts.report.execution_report_content import (
-    ExecutionReportContent,
-)
-from mlops_workflows.artifacts.report.execution_report_reference import (
-    ExecutionReportReference,
-)
 
 HASH = "a" * 64
+
+
 YOLO = ModelIdentity(
     key="yolo",
     kind="onnx_object_detector",
@@ -29,6 +25,8 @@ YOLO = ModelIdentity(
     revision="sha256:" + "0" * 64,
     details={"confidence_threshold": "0.25"},
 )
+
+
 MIRAGE = ModelIdentity(
     key="mirage",
     kind="mirage_official",
@@ -36,6 +34,8 @@ MIRAGE = ModelIdentity(
     source="/ckpt/mirage-llama3.1-8.3B",
     revision="100ea29f5fb9dbd35d52390075abd9f60b225478",
 )
+
+
 PASSED = [InferenceCheck(name="gpu_memory_loaded", passed=True, detail="20100 MiB")]
 
 
@@ -112,50 +112,14 @@ def report(**changes) -> ExecutionReport:
     return ExecutionReport(**values)
 
 
-def test_report_round_trip(tmp_path):
-    """Persist a report and recover an equal, validated report."""
-    reference = ExecutionReportReference(
-        name="report", location=str(tmp_path / "e2e" / "report.json")
-    )
-    content = ExecutionReportContent(data=report())
-
-    location = content.dematerialize(reference)
-    restored = reference.materialize()
-
-    assert location == reference.location
-    assert isinstance(restored, ExecutionReportContent)
-    assert restored.data == content.data
-
-
-def test_annotated_images_are_recovered_by_location(tmp_path):
-    """Image outputs are referenced by location, not embedded."""
-    reference = ExecutionReportReference(name="r", location=str(tmp_path / "r.json"))
-    ExecutionReportContent(data=report()).dematerialize(reference)
-
-    restored = reference.materialize().data
-    images = [
-        item.location
-        for pipeline_run in restored.pipelines
-        for item in pipeline_run.outputs
-        if item.kind == "image"
-    ]
-
-    assert images == ["a.png"]
-
-
-def test_missing_report_file(tmp_path):
-    reference = ExecutionReportReference(name="r", location=str(tmp_path / "no.json"))
-
-    with pytest.raises(FileNotFoundError):
-        reference.materialize()
-
-
-def test_corrupted_report_file_is_rejected(tmp_path):
-    path = tmp_path / "r.json"
-    path.write_text('{"run_id": "x"}', encoding="utf-8")
-
-    with pytest.raises(ValidationError):
-        ExecutionReportReference(name="r", location=str(path)).materialize()
+QWEN = ModelIdentity(
+    key="qwen3vl",
+    kind="llamacpp_gguf",
+    name="Qwen/Qwen3-VL-2B-Instruct-GGUF Q4_K_M",
+    source="experiments/qwen3vl/models/Qwen3VL-2B-Instruct-Q4_K_M.gguf",
+    revision="52d6c8ffea26cc873ac5ad116f8631268d7eb503",
+    details={"llama_cpp_commit": "6f1e6543704bc5b080c7a98e7b6f707b31f6ed51"},
+)
 
 
 def test_report_requires_at_least_one_model():
@@ -287,45 +251,6 @@ def test_extra_fields_are_rejected():
 def test_iou_threshold_range(threshold):
     with pytest.raises(ValidationError):
         evaluation(iou_threshold=threshold)
-
-
-def test_content_requires_a_report():
-    with pytest.raises(ValidationError):
-        ExecutionReportContent(data={"run_id": "x"})
-
-
-QWEN = ModelIdentity(
-    key="qwen3vl",
-    kind="llamacpp_gguf",
-    name="Qwen/Qwen3-VL-2B-Instruct-GGUF Q4_K_M",
-    source="experiments/qwen3vl/models/Qwen3VL-2B-Instruct-Q4_K_M.gguf",
-    revision="52d6c8ffea26cc873ac5ad116f8631268d7eb503",
-    details={"llama_cpp_commit": "6f1e6543704bc5b080c7a98e7b6f707b31f6ed51"},
-)
-
-
-def test_qwen_pipeline_round_trip(tmp_path):
-    qwen_run = run(
-        pipeline="qwen3vl", experiment="joint_detection", model_key="qwen3vl"
-    )
-    agnostic = evaluation(
-        pipeline="qwen3vl",
-        experiment="joint_detection",
-        coordinate_format="relative_1000",
-        class_aware=False,
-        subset="valid_responses",
-        confusion={"WBC": {"RBC": 1, "WBC": 2}},
-    )
-    reference = ExecutionReportReference(name="r", location=str(tmp_path / "r.json"))
-    content = ExecutionReportContent(
-        data=report(
-            models=[YOLO, QWEN], pipelines=[run(), qwen_run], evaluations=[agnostic]
-        )
-    )
-
-    content.dematerialize(reference)
-
-    assert reference.materialize().data == content.data
 
 
 def test_qwen_pipeline_needs_a_llamacpp_model():
