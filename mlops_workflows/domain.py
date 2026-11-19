@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel, ConfigDict, Field
 
 from mlops_workflows.artifacts.interface import ArtifactReference
+from mlops_workflows.components.interface import Component
 
 
 class Event(BaseModel):
@@ -17,26 +18,6 @@ class Event(BaseModel):
     sensor_data: ArtifactReference
     shop_id: str = Field(min_length=1)
     sensor_id: str = Field(min_length=1)
-
-
-class Component(ABC):
-    """Define the contract for tasks that process data."""
-
-    @abstractmethod
-    def prepare(
-        self,
-        input_artifacts: list[ArtifactReference],
-    ) -> object:
-        """Load and prepare the input data."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def execute(
-        self,
-        prepared_data: object,
-    ) -> list[ArtifactReference]:
-        """Process data, save outputs, and return their references."""
-        raise NotImplementedError
 
 
 @dataclass
