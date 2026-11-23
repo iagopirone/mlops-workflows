@@ -84,7 +84,7 @@ Estado anterior (19/11/2026):
 
 ## 5. Em andamento e pendente
 
-- **VISRES-337 concluída** (23/11/2026): código revisado e aprovado, ADR 011 aceito, commit enviado ao PR #4. Limitações conhecidas mantidas: chave repetida no JSON aceita na leitura; `ClassCount` mutável. Pendente: conferir os critérios no Jira (não lido nesta sessão, conector sem login).
+- **VISRES-337 concluída** (23/11/2026): código revisado e aprovado, ADR 011 aceito, commit enviado ao PR #4. Limitações conhecidas mantidas: chave repetida no JSON aceita na leitura; `ClassCount` mutável. Critérios conferidos no Jira em 23/11/2026, sem divergência; comentário na tarefa com o link do PR #4 (status no Jira não alterado).
 - **VISRES-305: não iniciada**, por decisão do usuário (encerrar primeiro a VISRES-337).
 - **Aguardando o usuário:**
   1. Aprovar o resultado da reorganização.
@@ -170,7 +170,7 @@ Veja o [log](log.md) para o histórico completo.
 
 ## 9. Próxima ação concreta
 
-**Agora (23/11/2026):** VISRES-337 encerrada e no PR #4. Próximo passo: aguardar o usuário. A VISRES-305 só começa com o pedido dele, por um plano. Conferir os critérios da VISRES-337 no Jira quando o conector Atlassian tiver login (`/mcp`).
+**Agora (23/11/2026):** VISRES-337 encerrada e no PR #4. Próximo passo: aguardar o usuário. A VISRES-305 só começa com o pedido dele, por um plano. Os critérios da VISRES-337 já foram conferidos no Jira. O conector Atlassian usa o endpoint V1, obsoleto, que será removido em 01/03/2027; é preciso reconectá-lo pelo endpoint V2.
 
 Histórico da frente anterior:
 

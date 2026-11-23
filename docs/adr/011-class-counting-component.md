@@ -62,3 +62,4 @@ evidence_basis: [approved, verified]
 - Duas limitações encontradas na revisão ficam **registradas, sem correção nesta tarefa** (decisão do usuário):
   1. **Chave repetida no JSON:** ao ler, `{"RBC": 1, "RBC": 2}` vira `{"RBC": 2}` (o último valor vence). Se as somas baterem, o arquivo é aceito. O componente nunca grava chaves repetidas, então só um arquivo editado à mão ou corrompido chega a esse caso; o `DetectionReference` se comporta igual.
   2. **`ClassCount` mutável:** atribuir um campo depois de criado (por exemplo, `total = 99`) não é revalidado, como no `ExecutionReport` e no `Detection`. A validação volta a rodar na leitura do arquivo.
+- **Jira conferido (23/11/2026, depois do commit `d003e39`):** a VISRES-337 foi lida com o conector reconectado; descrição e critério de conclusão coincidem com os critérios usados e estão atendidos.
