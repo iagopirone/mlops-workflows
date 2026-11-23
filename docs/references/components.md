@@ -38,6 +38,7 @@ sources:
 | `VisualQuestionAnsweringComponent` | Imagem + prompt → resposta textual | Verificado com simulador; **experimental** |
 | `TextDetectionParser` | JSON textual → `list[Detection]` em pixels, com `conf=None` | Verificado com respostas simuladas |
 | `TextDetectionParsingComponent` | Imagem + resposta textual → JSON de detecções | Verificado com respostas simuladas; **experimental**. Veja [interpretação](component-text-detection-parsing.md) |
+| `ClassCountingComponent` | JSON de detecções → contagem por classe (modo genérico ou restrito a um domínio) | Verificado com detecções simuladas e com JSONs reais já salvos (23/11/2026). Veja [contagem](component-class-counting.md) |
 | `MirageAnswerer` | Adaptador real do MIRAGE | Não iniciado |
 
 ## Separação de responsabilidades
@@ -46,3 +47,4 @@ sources:
 - O VQA não interpreta a resposta.
 - Transformar texto em detecções é tarefa do `TextDetectionParsingComponent`. Ele não conhece o MIRAGE nem o visualizador.
 - O visualizador consome qualquer `DetectionReference` que siga o esquema de `Detection`.
+- O `ClassCountingComponent` também consome qualquer `DetectionReference`: conta as predições como recebidas, sem filtrar confiança nem normalizar nomes, e grava um `ClassCountReference`.

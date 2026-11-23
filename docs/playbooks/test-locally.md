@@ -113,4 +113,13 @@ uv run python -m examples.demo_detection \
   --output-dir outputs
 ```
 
-Saídas esperadas da demonstração: JSON de detecções e imagem anotada. Para consumir essas detecções através do novo componente de visualização, ver [demonstração e pipeline](../reports/2026-11-16-yolo-visualization-demo.md).
+Contagem de classes a partir de um JSON de detecções de qualquer fonte (não executa modelo; detalhes em [contagem](../references/component-class-counting.md#exemplo-executável)):
+
+```bash
+uv run python -m examples.demo_class_counting \
+  --detections /caminho/para/detections.json \
+  --classes RBC WBC Platelets \
+  --output-dir outputs/class_counting
+```
+
+Saídas esperadas da demonstração de detecção: JSON de detecções e imagem anotada. Para consumir essas detecções através do novo componente de visualização, ver [demonstração e pipeline](../reports/2026-11-16-yolo-visualization-demo.md).
