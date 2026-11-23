@@ -16,7 +16,7 @@ sources:
   resource: Checkout local em feature/integracao-mirage (HEAD d3c737c + alterações não commitadas), inspecionado e testado em 23/11/2026
   title: Código, testes e execuções locais
 - id: visres-337
-  resource: Critérios da tarefa VISRES-337 colados pelo usuário em 23/11/2026 (o Jira não foi lido diretamente nesta sessão)
+  resource: Critérios da tarefa VISRES-337 colados pelo usuário e conferidos no Jira em 23/11/2026 (https://visio-ai.atlassian.net/browse/VISRES-337)
   title: Tarefa VISRES-337
 ---
 

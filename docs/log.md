@@ -4,6 +4,11 @@ Entradas da mais recente para a mais antiga. Datas absolutas. Formato e regras e
 
 ## 2026-11-23
 
+**VISRES-337 — critérios conferidos no Jira** (pedido do usuário)
+
+- Com o conector Atlassian reconectado, a VISRES-337 foi lida no Jira. A descrição e o critério de conclusão coincidem com os critérios colados pelo usuário e estão atendidos pelo commit `d003e39`; nenhuma divergência.
+- Comentário na VISRES-337 só com o link do PR #4, a pedido do usuário. O status da tarefa não foi alterado.
+
 **VISRES-337 — revisão do código, aprovação e versionamento** (autorizados pelo usuário)
 
 - Revisão final sem mudança de código: contratos, validação estrita (testada com JSONs: negativos, `true`, `2.0`, `"2"`, campo ausente ou extra recusados), `None` × `[]`, revalidação na leitura, detecções não alteradas, tipos de `prepare()`/`execute()`.
