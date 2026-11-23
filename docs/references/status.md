@@ -20,7 +20,7 @@ sources:
   title: Evidências da conversa de desenvolvimento
 ---
 
-# Matriz de estado (atualizada em 19/11/2026)
+# Matriz de estado (atualizada em 23/11/2026)
 
 Legenda: **Verificado** = inspecionado no código e/ou executado em 17/11/2026 · **Aprovado** = decisão do usuário ainda sem código · **Hipótese** = não comprovada · **Planejado** = proposta.
 
@@ -60,6 +60,7 @@ Legenda: **Verificado** = inspecionado no código e/ou executado em 17/11/2026 �
 | Revisão do `evidence_basis` e navegação dos links no GitHub | Concluído em 18/11/2026 | `evidence_basis` conferido e corrigido ([proveniência](provenance.md)); links relativos aprovados e aplicados ([ADR 008](../adr/008-relative-internal-links.md)) |
 | Pipelines de ponta a ponta com modelos reais (YOLO e MIRAGE) + relatório como artefato | **Preparação local implementada e testada com dados sintéticos** (18/11/2026); nenhum modelo executado para resultados; E4 e E8 em proposta | E1–E7 aprovadas; [plano](../plans/2026-11-18-plan-real-models-e2e.md), [ADR 009](../adr/009-execution-report-artifact.md), [relatório e drivers](artifact-execution-report.md). Validação do nome do checkpoint no `run_poc.py` (E3) implementada |
 | MIRAGE produzir bounding boxes confiáveis | **Hipótese experimental** | Sem capacidade documentada; veja [MIRAGE](mirage.md) |
+| `ClassCountingComponent` + artefato `ClassCount` (VISRES-337) | **Verificado e aprovado** em 23/11/2026; commit autorizado (VISRES-337) | Regras da tarefa e decisões do [ADR 011](../adr/011-class-counting-component.md) aprovadas pelo usuário depois da revisão do código. Limitações conhecidas registradas, sem correção: chave repetida no JSON aceita na leitura; `ClassCount` mutável. 48 testes novos (24 + 22 + 2); suíte principal 357 passed + 1 skipped; experimentos 332 + 1 skipped. Exemplo `examples/demo_class_counting.py` executado só com `--detections` sobre JSONs já salvos (YOLO e Qwen3-VL); o caminho `--model` não foi executado. Veja [contagem](component-class-counting.md) |
 | Orquestrador (`WorkflowRunner`, `StepSelector` etc.) | Só esqueletos | `domain.py` com `NotImplementedError` |
 
 ## Resultados de testes por arquivo (17/11/2026; validador acrescentado em 18/11/2026)
@@ -78,6 +79,9 @@ Legenda: **Verificado** = inspecionado no código e/ou executado em 17/11/2026 �
 | `tests/unit/components/visual_question_answering/test_visual_question_answerer.py` | 1 |
 | `tests/unit/components/visual_question_answering/test_visual_question_answering_component.py` | 8 |
 | `tests/unit/components/text_detection_parsing/test_text_detection_parser.py` | 99 |
+| `tests/unit/artifacts/class_count/test_class_count.py` / `_content.py` / `_reference.py` (23/11/2026) | 15 / 3 / 6 |
+| `tests/unit/components/class_counting/test_class_counting_component.py` (23/11/2026) | 22 |
+| `tests/integration/components/class_counting/test_class_counting_pipeline.py` (23/11/2026) | 2 |
 | `tests/unit/components/text_detection_parsing/test_text_detection_parsing_component.py` | 10 |
 | `tests/integration/artifacts/image/test_image_content.py` / `test_image_reference.py` | 3 / 6 |
 | `tests/integration/artifacts/video/test_video_content.py` / `test_video_reference.py` | 1 / 3 |
