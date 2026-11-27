@@ -168,7 +168,9 @@ uv run python -m experiments.e2e.build_report --manifest e2e-manifest.json
 
 | Arquivo | Testes |
 |---|---|
-| `tests/unit/artifacts/report/test_execution_report.py` | 34 |
+| `tests/unit/artifacts/report/test_execution_report.py` (modelo) | 34 |
+| `tests/unit/artifacts/report/test_execution_report_reference.py` | 5 |
+| `tests/unit/artifacts/report/test_execution_report_content.py` | 1 |
 | `experiments/e2e/tests/test_yolo_evaluation.py` | 7 |
 | `experiments/e2e/tests/test_bccd_annotations.py` | 20 |
 | `experiments/e2e/tests/test_training_format.py` | 20 |

@@ -66,10 +66,11 @@ Legenda: **Verificado** = inspecionado no cÃ³digo e/ou executado em 17/11/2026 Â
 
 | Arquivo | Testes |
 |---|---:|
-| `tests/unit/artifacts/image/test_image.py` | 16 |
-| `tests/unit/artifacts/video/test_video.py` | 3 |
-| `tests/unit/artifacts/text/test_text.py` | 7 |
-| `tests/unit/artifacts/detection/test_detection_artifacts.py` | 10 |
+| `tests/unit/artifacts/image/test_image_content.py` / `test_image_reference.py` | 9 / 7 |
+| `tests/unit/artifacts/video/test_video_content.py` / `test_video_reference.py` | 2 / 1 |
+| `tests/unit/artifacts/text/test_text_content.py` / `test_text_reference.py` | 2 / 5 |
+| `tests/unit/artifacts/detection/test_detection.py` / `test_detection_content.py` / `test_detection_reference.py` | 3 / 17 / 7 |
+| `tests/unit/artifacts/report/test_execution_report.py` / `_content.py` / `_reference.py` | 34 / 1 / 5 |
 | `tests/unit/components/object_detection/detectors/test_yolo_detector.py` | 32 |
 | `tests/unit/components/object_detection/test_object_detection_component.py` | 6 |
 | `tests/unit/components/object_detection/test_object_detector.py` | 1 |
@@ -78,8 +79,8 @@ Legenda: **Verificado** = inspecionado no cÃ³digo e/ou executado em 17/11/2026 Â
 | `tests/unit/components/visual_question_answering/test_visual_question_answering_component.py` | 8 |
 | `tests/unit/components/text_detection_parsing/test_text_detection_parser.py` | 99 |
 | `tests/unit/components/text_detection_parsing/test_text_detection_parsing_component.py` | 10 |
-| `tests/integration/artifacts/test_image.py` | 9 |
-| `tests/integration/artifacts/test_video.py` | 4 |
+| `tests/integration/artifacts/image/test_image_content.py` / `test_image_reference.py` | 3 / 6 |
+| `tests/integration/artifacts/video/test_video_content.py` / `test_video_reference.py` | 1 / 3 |
 | `tests/integration/components/object_detection/test_object_detection_component.py` | 1 (pulado sem ONNX) |
 | `tests/integration/components/detection_visualization/test_detection_pipeline.py` | 1 |
 | `tests/integration/components/visual_question_answering/test_visual_question_answering_pipeline.py` | 1 |

@@ -95,6 +95,10 @@ Workflow modular de inferência de ML em Python, com componentes intercambiávei
 
 ## 6. Última tarefa executada
 
+19/11/2026 (tarde): **testes de `DetectionContent`** (+17) e **fixtures compartilhadas do relatório** em `tests/unit/artifacts/report/conftest.py`; 309 passed, 1 skipped; commit enviado ao PR #4.
+
+19/11/2026 (depois do PR #4): **testes de artefatos separados em content e reference**, espelhando o código (convenção na [suíte de testes](references/test-suite.md)); 292 passed, 1 skipped; commit enviado ao PR #4.
+
 19/11/2026: **relatório técnico resumido** para a liderança ([resumo](reports/2026-11-19-local-multimodal-detection-summary.md)). Só documentação; nenhum código alterado, nenhum modelo executado. Depois, no mesmo dia e com autorização, o trabalho foi commitado em 12 commits, enviado e aberto como PR; o link do relatório foi comentado na VISRES-331 do Jira.
 
 Tarefa anterior: avaliação do Qwen3-VL no BCCD, 20 imagens (18/11/2026, noite; seção 9). Antes, 18/11/2026: **reorganização da documentação** no padrão OKF do `new-visio-research-models` ([plano](plans/2026-11-18-plan-docs-restructure.md), [ADR 007](adr/007-okf-documentation-structure.md), [log](log.md)).

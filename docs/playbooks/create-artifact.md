@@ -28,8 +28,8 @@ Modelo real a copiar: `mlops_workflows/artifacts/text/` (o artefato mais simples
 3. **Reference:** herda de `ArtifactReference` e implementa `materialize()`, que lê de `self.location`, lança `FileNotFoundError` se o arquivo não existir e devolve o Content.
 4. Não mude `model_config`: as classes base já usam `strict=True`, `extra="forbid"` e `validate_assignment=True`.
 5. Testes:
-   - unitários em `tests/unit/artifacts/<tipo>/test_<tipo>.py` (validação Pydantic, ida e volta, erros);
-   - de integração com `tmp_path` em `tests/integration/artifacts/` quando houver arquivo real;
+   - unitários em `tests/unit/artifacts/<tipo>/`, um arquivo por classe: `test_<tipo>_content.py` (validação de `data` e `dematerialize()`) e `test_<tipo>_reference.py` (validação da referência, `materialize()` e ida e volta);
+   - de integração com `tmp_path` em `tests/integration/artifacts/<tipo>/`, com a mesma divisão, quando houver arquivo real;
    - sem `__init__.py` nos testes (o pytest usa `--import-mode=importlib`).
 6. Valide com o playbook [testar localmente](test-locally.md).
 

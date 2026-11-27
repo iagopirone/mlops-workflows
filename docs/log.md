@@ -4,6 +4,22 @@ Entradas da mais recente para a mais antiga. Datas absolutas. Formato e regras e
 
 ## 2026-11-19
 
+**Testes de `DetectionContent` e fixtures compartilhadas do relatório** (pedido do usuário)
+
+- Novo `tests/unit/artifacts/detection/test_detection_content.py` (17 testes): `data` obrigatório; lista vazia aceita; rejeita o que não é lista (incluindo tupla, pelo modo estrito), itens que não são `Detection`, campos extras e atribuição inválida; `dematerialize()` devolve o local, grava todos os campos em ordem, mantém `conf` nulo como `null`, grava lista vazia, cria as pastas e sobrescreve o arquivo. O arquivo é lido com `json`, sem `DetectionReference.materialize()`.
+- Não testado, por não ser promessa da implementação: formato textual do JSON (indentação) e escape de caracteres fora do ASCII.
+- Construtores e constantes do relatório, antes duplicados em `test_execution_report.py` e `test_execution_report_reference.py`, passaram sem alteração para `tests/unit/artifacts/report/conftest.py`, expostos como fixtures (`make_run`, `make_evaluation`, `make_report`, `yolo_model`, `qwen_model`, `passed_checks`, `sha256`). Nos testes mudaram só as chamadas e as assinaturas; as asserções são as mesmas.
+- Resultados: detection 27 passed; report 40 passed (inalterado); suíte principal **309 passed, 1 skipped** (292 + 17); experimentos 332 passed, 1 skipped; cada arquivo de report e o novo arquivo de detection também passam isolados.
+
+**Testes de artefatos separados em content e reference** (aprovado pelo usuário)
+
+- Cada arquivo de teste de artefato foi dividido para espelhar o código: `test_<tipo>_content.py` e `test_<tipo>_reference.py`, nos unitários e na integração (agora em `tests/integration/artifacts/<tipo>/`). `Detection` e o modelo `ExecutionReport` têm arquivo próprio.
+- Ida e volta fica no arquivo de reference (decisão do usuário).
+- Os 69 testes foram movidos sem mudar o corpo (conferido comparando a árvore sintática de cada função com a versão commitada); total inalterado: **292 passed, 1 skipped**.
+- `detection/` não tem `test_detection_content.py`: nenhum teste exercita o `DetectionContent` isoladamente.
+- Os construtores do relatório (`report()`, `run()`, `evaluation()`, `record()` e constantes) ficaram duplicados em `test_execution_report.py` e `test_execution_report_reference.py`: sem `__init__.py` nos testes, compartilhar exigiria transformá-los em fixtures e alterar os testes.
+- Convenção registrada na [suíte de testes](references/test-suite.md) e no playbook [criar artefato](playbooks/create-artifact.md).
+
 **Commits, PR e Jira** (autorizados pelo usuário)
 
 - Trabalho da branch dividido em 12 commits por responsabilidade; ordem e motivo no [plano de commits](plans/2026-11-17-plan-commits.md#atualização-de-19112026-execução-autorizada).

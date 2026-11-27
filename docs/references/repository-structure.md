@@ -72,5 +72,5 @@ mlops-workflows/
 ## Observações
 
 - Os testes não têm `__init__.py`. O pytest usa `--import-mode=importlib`, o que permite arquivos com o mesmo nome em `unit/` e `integration/`.
-- Os arquivos antigos `tests/unit/artifacts/test_{image,video}.py` foram movidos para subpastas. A remoção aparece como não commitada.
+- Os testes de artefatos ficam em `tests/{unit,integration}/artifacts/<tipo>/`, separados em `test_<tipo>_content.py` e `test_<tipo>_reference.py` (19/11/2026).
 - Os modelos `.onnx` e as imagens de teste ficam fora do repositório, em caminhos locais.

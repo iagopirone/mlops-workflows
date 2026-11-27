@@ -1,4 +1,4 @@
-"""Test detection artifact serialization and loading."""
+"""Test DetectionReference loading and round trips."""
 
 import json
 
@@ -96,3 +96,22 @@ def test_detection_reference_rejects_invalid_data(
 
     with pytest.raises((TypeError, ValueError, ValidationError)):
         reference.materialize()
+
+
+def test_detection_without_confidence_round_trip(tmp_path):
+    """Save an unknown confidence as JSON null and load it back as None."""
+    reference = DetectionReference(
+        name="text_detections",
+        location=str(tmp_path / "text_detections.json"),
+    )
+    content = DetectionContent(
+        data=[Detection(cls="WBC", conf=None, box=[1, 2, 3, 4])],
+    )
+
+    content.dematerialize(reference)
+
+    saved = json.loads((tmp_path / "text_detections.json").read_text("utf-8"))
+    restored = reference.materialize()
+
+    assert saved == [{"cls": "WBC", "conf": None, "box": [1.0, 2.0, 3.0, 4.0]}]
+    assert restored.data[0].conf is None

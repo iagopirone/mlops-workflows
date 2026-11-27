@@ -25,6 +25,8 @@ sources:
 - **`tests/unit/`:** classes e métodos isolados (Pydantic, arquivos, caixas, erros), com simuladores (`Fake*`) no lugar dos modelos.
 - **`tests/integration/`:** artefatos com arquivos reais (`tmp_path`) e componentes encadeados.
 - **Teste com ONNX real:** pulado se `DETECTION_MODEL_PATH` e `DETECTION_IMAGE_PATH` não estiverem definidas.
+- **Artefatos (19/11/2026, decisão do usuário):** os testes espelham a separação do código. Para cada `<tipo>`, há `test_<tipo>_content.py` (validação de `data` e `dematerialize()`) e `test_<tipo>_reference.py` (validação da referência e `materialize()`), em `tests/unit/artifacts/<tipo>/` e, quando há arquivo real, em `tests/integration/artifacts/<tipo>/`. Testes de ida e volta (`dematerialize` → `materialize`) ficam no arquivo de **reference**. Modelos com arquivo próprio também têm teste próprio: `detection/test_detection.py` (`Detection`) e `report/test_execution_report.py` (`ExecutionReport`).
+- **Dados de exemplo compartilhados:** quando dois arquivos da mesma pasta precisam dos mesmos objetos de exemplo, eles ficam num `conftest.py` dessa pasta e são expostos como fixtures (sem `__init__.py`, os testes não importam módulos irmãos). Exemplo: `tests/unit/artifacts/report/conftest.py` fornece `make_run`, `make_evaluation` e `make_report` (fábricas que devolvem objetos válidos e aceitam só os campos que o teste muda) e `yolo_model`, `qwen_model`, `passed_checks` e `sha256`.
 - **Configuração:** `pyproject.toml` define `testpaths = ["tests"]` e `--import-mode=importlib`; não há `__init__.py` nos testes.
 - **`tests/unit/scripts/`** (18/11/2026): testes do validador `scripts/okf_lint.py`. Um deles (`test_real_docs_bundle_is_valid`) valida o `docs/` real, então **uma documentação quebrada (link, índice ou frontmatter) faz a suíte falhar**.
 - **Regra:** nunca carregar o MIRAGE em testes automatizados. Um teste real futuro deverá ser pulado quando não estiver configurado, como o do ONNX.
@@ -54,6 +56,8 @@ A contagem por arquivo está em [status](status.md#resultados-de-testes-por-arqu
 | 17/11/2026 | 171 | +69 do parser de texto: 55 do parser, 7 do componente, 2 de integração, +4 de `Detection` e +1 do visualizador |
 | 17/11/2026 | 218 | +47 de regressão P1–P3: +44 do parser e +3 do componente |
 | 18/11/2026 | 250 | +32 do validador da documentação (`tests/unit/scripts/test_okf_lint.py`), incluindo um teste que valida o `docs/` real |
+| 19/11/2026 (tarde) | 309 | +17 de `DetectionContent` (`tests/unit/artifacts/detection/test_detection_content.py`); os construtores duplicados do relatório passaram para `tests/unit/artifacts/report/conftest.py` |
+| 19/11/2026 | 292 | Testes de artefatos separados em content e reference: os 69 testes foram só movidos, sem mudar o corpo (conferido pela árvore sintática); total inalterado |
 | 18/11/2026 (tarde) | 253 | Validador com links relativos (ADR 008): 3 testes trocados e 3 novos, 35 no total |
 | 18/11/2026 (tarde) | 278 | +25 do artefato de relatório (`tests/unit/artifacts/report/`). Fora da suíte: +12 do `run_poc` (81) e +36 de `experiments/e2e/` |
 | 18/11/2026 (noite) | 287 | +9 do artefato de relatório (34 no total). Fora da suíte: `run_poc` 37, `experiments/e2e` 86, `experiments/florence2` 19 |
