@@ -1,0 +1,5 @@
+# llama.cpp binaries, downloaded GGUF weights and run outputs stay out of Git.
+bin/
+models/
+outputs/
+__pycache__/
