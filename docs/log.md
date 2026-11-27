@@ -4,6 +4,16 @@ Entradas da mais recente para a mais antiga. Datas absolutas. Formato e regras e
 
 ## 2026-11-27
 
+**VISRES-305 versionada e PR #12 aberto** (autorizado pelo usuário; nenhum merge)
+
+- Conferido antes do commit: `Step` recusa com `TypeError` um `component` que não seja `Component` e itens de `input_artifacts`/`output_artifacts` que não sejam `ArtifactReference`. Os testes cobrem os três campos, e os 37 testes de `tests/unit/pipeline/` passam.
+- Commit `0b457f1` na `feature/organizar-pipeline` (local, sem push). Levado com `cherry-pick -x`, sem conflitos, para a branch nova `feature/estrutura-pipeline`, criada a partir de `feature/contagem-classes` (#8). Na nova branch o commit é `9810163`.
+- **Sem experimentos no PR:** o commit transportado tem 21 arquivos, nenhum em `experiments/`. O patch é idêntico ao original, e o diff de `experiments/` em relação ao #8 está vazio.
+- **Verificação na nova base, sem modelos reais:** suíte principal **394 passed, 1 skipped** (o skip é o YOLO real); `okf_lint` OK; `ruff check` e `ruff format --check` OK nos arquivos versionados.
+- **Problema observado:** `ruff check .` acusa 492 erros, todos em arquivos não versionados de `experiments/florence2/models/` (código do Florence-2 baixado localmente). Nesta base eles aparecem porque os `.gitignore` de `experiments/` só existem nas branches dos experimentos. Os arquivos não foram apagados nem versionados.
+- **PR [#12](https://github.com/iagopirone/mlops-workflows/pull/12):** base `feature/contagem-classes`, 1 commit, 21 arquivos, `MERGEABLE`. Ordem de revisão: #5 → #6 → #7 → #8 → #12.
+- **Depois da abertura:** o usuário aprovou o PR #12 e autorizou um commit só de documentação (`docs/log.md`, `docs/handoff.md`, `docs/references/status.md`) com o registro da abertura. Decisão do usuário: os arquivos do Florence-2 não são modificados, e o Ruff passa a rodar nos arquivos Python versionados, porque a verificação global está sendo afetada por esses arquivos externos não versionados.
+
 **Divisão do PR #4 publicada: PRs #5 a #11 abertos e PR #4 fechado** (autorizado pelo usuário: push, PRs, fechamento do #4 e comentário no Jira)
 
 - **Push** das sete branches, sem force push. O hook `protected-branches` passou, e as alterações locais da VISRES-305 foram preservadas (15 entradas no `git status`, como antes).

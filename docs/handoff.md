@@ -54,7 +54,8 @@ Workflow modular de inferência de ML em Python, com componentes intercambiávei
 
 - **PR #4 dividido e fechado sem merge** em 27/11/2026, a pedido do líder. Substituído pelos PRs empilhados **#5 a #11** (parte 4 = #8, VISRES-337; 5a–5c = #9–#11). Ordem de revisão: #5 → #6 → #7 → #8 e, em paralelo sobre o #7, #9 → #10 → #11. Nenhum foi mesclado. A branch `feature/integracao-mirage` foi preservada. Tabela e verificações no [log](log.md#2026-11-27). PR #3 já foi mesclado em `rc`.
 - Restos locais da divisão, que podem ser removidos com autorização: worktree `split-wt` no scratchpad de outra sessão (branch `feature/experimentos-e2e`) e branch `tmp/split-check`.
-- **Os PRs divididos já foram reenviados.** O PR da VISRES-305 pode ser aberto quando o usuário autorizar o commit. A base prevista é `feature/contagem-classes` (#8). A branch atual (`feature/organizar-pipeline`) parte de `dd2b50e`; antes do PR será preciso levar os commits para cima de `feature/contagem-classes`, e isso depende de aprovação.
+- **VISRES-305 no PR [#12](https://github.com/iagopirone/mlops-workflows/pull/12)** (27/11/2026): branch `feature/estrutura-pipeline` (commit `9810163`), base `feature/contagem-classes` (#8). Nenhum PR foi mesclado. **Branch atual: `feature/estrutura-pipeline`.** A `feature/organizar-pipeline` ficou só local, com o commit original `0b457f1` sobre `dd2b50e`.
+- **A verificação global do Ruff (`ruff check .`) está sendo afetada por arquivos externos não versionados:** 492 erros, todos no código do Florence-2 baixado em `experiments/florence2/models/`. Nesta branch eles aparecem porque os `.gitignore` de `experiments/` só existem nas branches dos experimentos. Por decisão do usuário (27/11/2026), esses arquivos não são modificados, e a verificação é feita nos arquivos Python versionados: `git ls-files -z '*.py' | xargs -0 uv run ruff check` e `git ls-files -z '*.py' '*.md' | xargs -0 uv run ruff format --check`.
 
 Estado em 26/11/2026:
 
@@ -118,6 +119,8 @@ Estado anterior (19/11/2026):
   - separar a pesquisa do MIRAGE e a revisão do parser em relatórios (opcional, ver [plano da reorganização](plans/2026-11-18-plan-docs-restructure.md)).
 
 ## 6. Última tarefa executada
+
+27/11/2026: **VISRES-305 versionada** e aberta como PR #12, empilhado sobre o #8; 394 passed, 1 skipped na nova base. Veja o [log](log.md#2026-11-27).
 
 27/11/2026: **divisão do PR #4 publicada.** Push das sete branches, PRs empilhados #5–#11 abertos (nenhum mesclado), bases, commits e árvore conferidos, e só então o PR #4 foi fechado sem merge, com comentário e a branch preservada. Comentário na VISRES-337 com o link do #8. Detalhes no [log](log.md#2026-11-27).
 
@@ -191,7 +194,7 @@ Veja o [log](log.md) para o histórico completo.
 
 ## 9. Próxima ação concreta
 
-**Agora (27/11/2026):** PRs #5–#11 aguardam revisão, na ordem #5 → #6 → #7 → #8 e #9 → #10 → #11. VISRES-305 continua sem commit. Com autorização do usuário: commit, levar o trabalho para cima de `feature/contagem-classes` e abrir o PR com base no #8. O conector Atlassian continua no endpoint V1, obsoleto.
+**Agora (27/11/2026):** PRs #5–#12 aguardam revisão, na ordem #5 → #6 → #7 → #8 → #12 e, em paralelo, #9 → #10 → #11. Nada a fazer até o retorno da revisão; nenhum merge sem autorização. O conector Atlassian continua no endpoint V1, obsoleto.
 
 Situação anterior (26/11/2026): a arquitetura e o ADR 012 foram aprovados; o ajuste final (tipos de `component` e dos artefatos no `Step`) foi feito e aguarda a confirmação do usuário. Depois disso, só com autorização: commit, push e PR da VISRES-305. Só com autorização: commit na `feature/organizar-pipeline`, push e PR empilhado sobre o #4. O ADR 012 passa a Aceito depois da aprovação.
 
