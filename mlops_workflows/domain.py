@@ -1,12 +1,13 @@
 """Define data structures and contracts for pipeline execution."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from mlops_workflows.artifacts.interface import ArtifactReference
 from mlops_workflows.components.interface import Component
+from mlops_workflows.pipeline.pipeline import Pipeline
+from mlops_workflows.pipeline.step import Step
 
 
 class Event(BaseModel):
@@ -18,25 +19,6 @@ class Event(BaseModel):
     sensor_data: ArtifactReference
     shop_id: str = Field(min_length=1)
     sensor_id: str = Field(min_length=1)
-
-
-@dataclass
-class Step:
-    """Represent a processing step and its dependencies."""
-
-    step_name: str
-    component: Component
-    depends_on: list["Step"] = field(default_factory=list)
-    input_artifacts: list[ArtifactReference] = field(default_factory=list)
-    output_artifacts: list[ArtifactReference] = field(default_factory=list)
-
-
-@dataclass
-class Pipeline:
-    """Group the steps that define a processing workflow."""
-
-    pipeline_id: str
-    steps: list[Step]
 
 
 class PipelineRepository(ABC):

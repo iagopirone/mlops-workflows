@@ -28,7 +28,8 @@ sources:
 mlops-workflows/
 ├── CLAUDE.md                          # instruções para agentes (nc)
 ├── mlops_workflows/
-│   ├── domain.py                      # Event, Step, Pipeline + esqueletos do orquestrador
+│   ├── domain.py                      # Event, PipelineRepository + esqueletos do orquestrador; importa Step e Pipeline
+│   ├── pipeline/                      # Step, Pipeline (validado na criação), InvalidPipelineError (nc, 26/11/2026)
 │   ├── artifacts/
 │   │   ├── interface.py               # ArtifactReference
 │   │   ├── content.py                 # ArtifactContent
@@ -57,6 +58,7 @@ mlops-workflows/
 ├── tests/
 │   ├── unit/artifacts/{image,video,text,detection,report,class_count}/
 │   ├── unit/components/{object_detection,detection_visualization,visual_question_answering,text_detection_parsing,class_counting}/
+│   ├── unit/pipeline/                 # Step, Pipeline e pipeline de exemplo (nc, 26/11/2026)
 │   ├── unit/scripts/test_okf_lint.py  # testes do validador da documentação (nc)
 │   ├── integration/artifacts/
 │   └── integration/components/{object_detection,detection_visualization,visual_question_answering,text_detection_parsing,class_counting}/

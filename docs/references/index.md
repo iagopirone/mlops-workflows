@@ -25,6 +25,7 @@ Documentos vivos: contratos, componentes, artefatos, estado e regras. O código 
 * [Avaliador offline de detecções do MIRAGE](mirage-evaluation.md) - Como o evaluate_detections.py compara detecções extraídas de respostas textuais com anotações humanas; métricas, formatos, políticas e limitações.
 * [MIRAGE — capacidades verificadas e viabilidade](mirage.md) - O que as fontes oficiais confirmam sobre o MIRAGE, requisitos, limites e prova de conceito planejada.
 * [Diretrizes de documentação OKF](okf-guidelines.md) - Estrutura, frontmatter, nomes, links, índices, log e validação do bundle docs/, adaptados do new-visio-research-models.
+* [Pipeline e etapas](pipeline.md) - Step e Pipeline em mlops_workflows/pipeline/ — campos, imutabilidade, finalização, regras de validação da estrutura, pipeline de exemplo e testes.
 * [Visão geral do mlops-workflows](overview.md) - Propósito, objetivos, escopo e casos de uso do repositório.
 * [Fontes, limites e confiança desta documentação](provenance.md) - Identificação das evidências, lacunas de acesso e estado de revisão humana.
 * [Estrutura do repositório](repository-structure.md) - Mapa real dos diretórios e módulos no checkout local.

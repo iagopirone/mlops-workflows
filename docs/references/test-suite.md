@@ -31,6 +31,16 @@ sources:
 - **`tests/unit/scripts/`** (18/11/2026): testes do validador `scripts/okf_lint.py`. Um deles (`test_real_docs_bundle_is_valid`) valida o `docs/` real, então **uma documentação quebrada (link, índice ou frontmatter) faz a suíte falhar**.
 - **Regra:** nunca carregar o MIRAGE em testes automatizados. Um teste real futuro deverá ser pulado quando não estiver configurado, como o do ONNX.
 
+## Resultados verificados em 26/11/2026 (Pipeline, VISRES-305)
+
+| Execução | Resultado |
+|---|---|
+| `uv run python -m pytest -q -rs tests/unit/pipeline` | **37 passed** (16 de `Step`, 19 de `Pipeline`, 2 do pipeline de exemplo) |
+| `uv run python -m pytest -q -rs` (sem ONNX) | **394 passed, 1 skipped** (357 + 37; o skip é o teste do YOLO real) |
+| Com `DETECTION_MODEL_PATH` e `DETECTION_IMAGE_PATH` | **391 passed** antes do ajuste final (roda uma inferência real do YOLO no teste de integração já existente); **não repetido** depois do ajuste, por decisão do usuário (sem modelos reais) |
+| `uv run python -m pytest -q -rs experiments/mirage/tests experiments/e2e/tests experiments/florence2/tests experiments/qwen3vl/tests` | **332 passed, 1 skipped** (inalterado) |
+| `ruff check .`, `ruff format --check .`, `scripts/okf_lint.py` | OK |
+
 ## Resultados verificados em 23/11/2026 (contagem de classes, VISRES-337)
 
 | Execução | Resultado |
@@ -74,6 +84,7 @@ A contagem por arquivo está em [status](status.md#resultados-de-testes-por-arqu
 | 18/11/2026 (noite, Qwen3-VL) | 287 | Suíte principal inalterada. Fora da suíte: +26 de `experiments/qwen3vl` |
 | 18/11/2026 (Fase 1 BCCD) | 292 | +5 do relatório (Qwen, avaliação). Fora da suíte: `experiments/mirage` 168 (+84, pareamento ótimo), `experiments/e2e` 105 (+19), `experiments/qwen3vl` 39 |
 | 23/11/2026 | 357 | +48 da contagem de classes: 24 do artefato `class_count`, 22 do `ClassCountingComponent`, 2 de integração. Fora da suíte: 332 (inalterado) |
+| 26/11/2026 | 394 | +37 do pipeline (`tests/unit/pipeline/`): 16 de `Step`, 19 de `Pipeline`, 2 do pipeline de exemplo. Fora da suíte: 332 (inalterado) |
 | 18/11/2026 (piloto BCCD) | 293 | +1 do relatório (`completed_inferences`). Fora da suíte: `experiments/e2e` 107 (+1 `draw_ground_truth`, +1 `completed_inferences`) |
 
 ## Casos cobertos nos componentes recentes
@@ -92,6 +103,8 @@ A contagem por arquivo está em [status](status.md#resultados-de-testes-por-arqu
   - imagem protegida contra um answerer que a altera;
   - prompt vazio, resposta que não é texto e falha de inferência não geram saída;
   - integração com arquivos reais.
+
+- **Pipeline:** cada inconsistência da VISRES-305 (IDs duplicados ou vazios, dependência externa, ciclo, autodependência, dependência repetida, nenhuma etapa de processamento, dependência da finalização, etapa sem caminho até a finalização), coleções mutáveis recusadas, imutabilidade e pipeline de exemplo aceito. Detalhes em [pipeline](pipeline.md#testes-verificados-em-26112026).
 
 - **Contagem de classes:** modos genérico, restrito e `[]`; zeros; exclusões; zero detecções; confiança não filtrada; nomes não normalizados; detecções preservadas; entradas inválidas sem saída; ida e volta e revalidação do JSON. Detalhes em [contagem](component-class-counting.md#testes-verificados-em-23112026) e [artefato](artifact-class-count.md#testes-verificados-em-23112026).
 
