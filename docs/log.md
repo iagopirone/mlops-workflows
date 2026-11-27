@@ -2,6 +2,33 @@
 
 Entradas da mais recente para a mais antiga. Datas absolutas. Formato e regras em [diretrizes OKF](references/okf-guidelines.md#log).
 
+## 2026-11-23
+
+**VISRES-337 — critérios conferidos no Jira** (pedido do usuário)
+
+- Com o conector Atlassian reconectado, a VISRES-337 foi lida no Jira. A descrição e o critério de conclusão coincidem com os critérios colados pelo usuário e estão atendidos pelo commit `d003e39`; nenhuma divergência.
+- Comentário na VISRES-337 só com o link do PR #4, a pedido do usuário. O status da tarefa não foi alterado.
+
+**VISRES-337 — revisão do código, aprovação e versionamento** (autorizados pelo usuário)
+
+- Revisão final sem mudança de código: contratos, validação estrita (testada com JSONs: negativos, `true`, `2.0`, `"2"`, campo ausente ou extra recusados), `None` × `[]`, revalidação na leitura, detecções não alteradas, tipos de `prepare()`/`execute()`.
+- Duas limitações encontradas e **mantidas por decisão do usuário**, registradas no [ADR 011](adr/011-class-counting-component.md#atualização-de-23112026-revisão-do-usuário) e no [artefato](references/artifact-class-count.md#limitações): chave repetida no JSON aceita na leitura (o último valor vence); `ClassCount` mutável sem revalidação na atribuição.
+- Decisões 5–10 do ADR 011 aprovadas (novo artefato, `detection_count`, ordem das classes, método privado de contagem); ADR 011 passou a Aceito.
+- Commit autorizado: `feat(counting): implementa contagem de classes por domínio (VISRES-337)`, enviado ao PR #4 sem reescrever histórico.
+
+**VISRES-337 — `ClassCountingComponent` implementado** (pedido do usuário; não commitado, aguardando revisão)
+
+- O Jira não foi lido: o conector Atlassian falhou e pede login. Os critérios usados são os colados pelo usuário.
+- **Código novo:**
+  - `mlops_workflows/artifacts/class_count/`: `ClassCount` (Pydantic estrito com regras de consistência), `ClassCountContent` (grava JSON) e `ClassCountReference` (lê e revalida);
+  - `mlops_workflows/components/class_counting/class_counting_component.py`: `prepare()` exige um `DetectionReference` e devolve `DetectionContent`; `execute()` conta por `cls` e grava a contagem;
+  - `examples/demo_class_counting.py`: `--detections` (qualquer fonte) ou `--model`/`--image` (YOLO); `--classes` omitido → `None`, sem nomes → `[]`.
+- **Regras (aprovadas na tarefa):** `None` conta tudo; `[]` não conta nada; classes configuradas sem detecção aparecem com zero; o que está fora do domínio vai para `excluded` e não entra no total; sem filtro de confiança; sem normalizar nomes; sem lista embutida; o detector não é executado nem alterado.
+- **Escolhas de implementação (proposta):** novo par de artefato (o `execute()` precisa devolver uma referência persistida e nenhum tipo existente representa contagens); campo `detection_count` para verificar `total + soma(excluded)`; ordem configurada no modo restrito e de primeira ocorrência no genérico; construtor copia a lista e rejeita duplicatas. [ADR 011](adr/011-class-counting-component.md).
+- **Testes:** +48 (24 do artefato, 22 do componente, 2 de integração com `FakeDetector` e com o parser de texto). Suíte principal **357 passed, 1 skipped** (era 309 + 1); experimentos **332 passed, 1 skipped** (inalterado). `ruff check`, `ruff format --check` e `okf_lint` OK. Nenhum modelo executado.
+- **Exemplo verificado** com `--detections` sobre JSONs já salvos e fora do Git: YOLO (17 detecções: RBC 15, WBC 1, Platelets 1) e Qwen3-VL (23 detecções com `conf: null`); entradas com o mesmo SHA-256 depois da execução.
+- **Documentação:** [contagem](references/component-class-counting.md), [artefato](references/artifact-class-count.md), ADR 011, componentes, artefatos, estrutura do repositório, suíte de testes, pipeline atual, testar localmente, proveniência, status e handoff.
+
 ## 2026-11-19
 
 **Testes de `DetectionContent` e fixtures compartilhadas do relatório** (pedido do usuário)

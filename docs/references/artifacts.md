@@ -34,6 +34,7 @@ O par `Reference` / `Content` encapsula localização, carregamento, representa�
 | Vídeo | `VideoReference` | `VideoContent` | `list[np.ndarray]` + `fps` | `.avi` / `.mp4` sem áudio |
 | Detecções | `DetectionReference` | `DetectionContent` | `list[Detection]` | JSON |
 | Texto | `TextReference` | `TextContent` | `str` | UTF-8 |
+| Contagem de classes | `ClassCountReference` | `ClassCountContent` | `ClassCount` (Pydantic) | JSON UTF-8 ([detalhes](artifact-class-count.md), desde 23/11/2026) |
 | Relatório de execução | `ExecutionReportReference` | `ExecutionReportContent` | `ExecutionReport` (Pydantic) | JSON UTF-8 ([detalhes](artifact-execution-report.md), desde 18/11/2026) |
 
 ## Responsabilidades

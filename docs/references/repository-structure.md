@@ -36,7 +36,8 @@ mlops-workflows/
 │   │   ├── video/                     # VideoReference / VideoContent
 │   │   ├── detection/                 # detection.py, detection_content.py, detection_reference.py
 │   │   ├── text/                      # TextReference / TextContent (nc)
-│   │   └── report/                    # ExecutionReport + Reference/Content (nc, 18/11/2026)
+│   │   ├── report/                    # ExecutionReport + Reference/Content (nc, 18/11/2026)
+│   │   └── class_count/               # ClassCount + Reference/Content (nc, 23/11/2026)
 │   └── components/
 │       ├── interface.py               # Component
 │       ├── object_detection/
@@ -45,18 +46,20 @@ mlops-workflows/
 │       │   └── detectors/yolo_detector.py
 │       ├── detection_visualization/   # DetectionVisualizationComponent (nc)
 │       ├── visual_question_answering/ # VisualQuestionAnswerer + component (nc)
-│       └── text_detection_parsing/    # TextDetectionParser + component (nc)
+│       ├── text_detection_parsing/    # TextDetectionParser + component (nc)
+│       └── class_counting/            # ClassCountingComponent (nc, 23/11/2026)
 ├── examples/demo_detection.py
+├── examples/demo_class_counting.py    # contagem a partir de um JSON de detecções ou do YOLO (nc, 23/11/2026)
 ├── experiments/mirage/              # prova de conceito isolada: run_poc.py, evaluate_detections.py, prompts/, tests/, ruff.toml, README (nc)
 ├── experiments/e2e/                 # drivers, anotações BCCD, formato do treino, avaliação, build_report, tests/ (nc, 18/11/2026)
 ├── experiments/qwen3vl/             # Qwen3-VL-2B GGUF com llama.cpp: run_qwen.py (stdlib, teto de memória), render.py, adaptador, tests/ (nc, 18/11/2026)
 ├── experiments/florence2/           # Florence-2 isolado: venv próprio, run_florence.py, render.py, adaptador, tests/ (nc, 18/11/2026)
 ├── tests/
-│   ├── unit/artifacts/{image,video,text,detection}/
-│   ├── unit/components/{object_detection,detection_visualization,visual_question_answering,text_detection_parsing}/
+│   ├── unit/artifacts/{image,video,text,detection,report,class_count}/
+│   ├── unit/components/{object_detection,detection_visualization,visual_question_answering,text_detection_parsing,class_counting}/
 │   ├── unit/scripts/test_okf_lint.py  # testes do validador da documentação (nc)
 │   ├── integration/artifacts/
-│   └── integration/components/{object_detection,detection_visualization,visual_question_answering,text_detection_parsing}/
+│   └── integration/components/{object_detection,detection_visualization,visual_question_answering,text_detection_parsing,class_counting}/
 ├── scripts/okf_lint.py                # validador do bundle docs/, só biblioteca padrão (nc)
 ├── docs/                              # bundle OKF (reorganizado em 18/11/2026; nc)
 │   ├── index.md, log.md, CLAUDE.md, handoff.md

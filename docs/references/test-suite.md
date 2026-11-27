@@ -31,6 +31,16 @@ sources:
 - **`tests/unit/scripts/`** (18/11/2026): testes do validador `scripts/okf_lint.py`. Um deles (`test_real_docs_bundle_is_valid`) valida o `docs/` real, então **uma documentação quebrada (link, índice ou frontmatter) faz a suíte falhar**.
 - **Regra:** nunca carregar o MIRAGE em testes automatizados. Um teste real futuro deverá ser pulado quando não estiver configurado, como o do ONNX.
 
+## Resultados verificados em 23/11/2026 (contagem de classes, VISRES-337)
+
+| Execução | Resultado |
+|---|---|
+| `uv run python -m pytest -q -rs` (sem ONNX) | **357 passed, 1 skipped** (309 + 48 novos; o skip é o teste do YOLO real) |
+| `uv run python -m pytest -q -rs experiments/mirage/tests experiments/e2e/tests experiments/florence2/tests experiments/qwen3vl/tests` | **332 passed, 1 skipped** (inalterado) |
+| Testes novos isolados (`tests/unit/artifacts/class_count`, `tests/unit/components/class_counting`, `tests/integration/components/class_counting`) | **48 passed** (24 do artefato, 22 do componente, 2 de integração) |
+| Com `DETECTION_MODEL_PATH` e `DETECTION_IMAGE_PATH` | **Não executado** (a tarefa não autorizou executar modelos) |
+| `ruff check .`, `ruff format --check .`, `scripts/okf_lint.py` | OK |
+
 ## Resultados verificados (18/11/2026)
 
 | Execução | Resultado |
@@ -63,6 +73,7 @@ A contagem por arquivo está em [status](status.md#resultados-de-testes-por-arqu
 | 18/11/2026 (noite) | 287 | +9 do artefato de relatório (34 no total). Fora da suíte: `run_poc` 37, `experiments/e2e` 86, `experiments/florence2` 19 |
 | 18/11/2026 (noite, Qwen3-VL) | 287 | Suíte principal inalterada. Fora da suíte: +26 de `experiments/qwen3vl` |
 | 18/11/2026 (Fase 1 BCCD) | 292 | +5 do relatório (Qwen, avaliação). Fora da suíte: `experiments/mirage` 168 (+84, pareamento ótimo), `experiments/e2e` 105 (+19), `experiments/qwen3vl` 39 |
+| 23/11/2026 | 357 | +48 da contagem de classes: 24 do artefato `class_count`, 22 do `ClassCountingComponent`, 2 de integração. Fora da suíte: 332 (inalterado) |
 | 18/11/2026 (piloto BCCD) | 293 | +1 do relatório (`completed_inferences`). Fora da suíte: `experiments/e2e` 107 (+1 `draw_ground_truth`, +1 `completed_inferences`) |
 
 ## Casos cobertos nos componentes recentes
@@ -81,6 +92,8 @@ A contagem por arquivo está em [status](status.md#resultados-de-testes-por-arqu
   - imagem protegida contra um answerer que a altera;
   - prompt vazio, resposta que não é texto e falha de inferência não geram saída;
   - integração com arquivos reais.
+
+- **Contagem de classes:** modos genérico, restrito e `[]`; zeros; exclusões; zero detecções; confiança não filtrada; nomes não normalizados; detecções preservadas; entradas inválidas sem saída; ida e volta e revalidação do JSON. Detalhes em [contagem](component-class-counting.md#testes-verificados-em-23112026) e [artefato](artifact-class-count.md#testes-verificados-em-23112026).
 
 ## Comandos
 

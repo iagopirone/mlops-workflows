@@ -17,7 +17,7 @@ sources:
   title: Código, testes e execuções locais
 ---
 
-# Handoff — última atualização: 19/11/2026
+# Handoff — última atualização: 23/11/2026
 
 > Leia este arquivo primeiro. Depois: [status](references/status.md), [log](log.md), as [invariantes](references/invariants.md) e a página técnica da tarefa em curso (índice em [index](index.md)). Regras da documentação: `docs/CLAUDE.md` e [diretrizes OKF](references/okf-guidelines.md). **Modo de trabalho: planejar → executar → validar → documentar, com aprovação do usuário antes de executar.** **O código é a fonte de verdade**; se divergir deste texto, confie no código e corrija este arquivo.
 
@@ -49,7 +49,12 @@ Workflow modular de inferência de ML em Python, com componentes intercambiávei
   - não calcula AP/mAP.
 - Imagens: `np.ndarray` BGR (OpenCV).
 
-## 3. Estado do Git (19/11/2026)
+## 3. Estado do Git (23/11/2026)
+
+- **VISRES-337 (contagem de classes) aprovada e versionada** em 23/11/2026, num commit próprio sobre `d3c737c` na branch `feature/integracao-mirage`, enviado ao PR #4 (sem force push, base inalterada). Confira o hash com `git log -1`. Arquivos novos: `mlops_workflows/artifacts/class_count/`, `mlops_workflows/components/class_counting/`, `examples/demo_class_counting.py`, `tests/unit/artifacts/class_count/`, `tests/unit/components/class_counting/`, `tests/integration/components/class_counting/`, `docs/references/component-class-counting.md`, `docs/references/artifact-class-count.md`, `docs/adr/011-class-counting-component.md`; documentos vivos atualizados (veja o [log](log.md#2026-11-23)).
+
+Estado anterior (19/11/2026):
+
 
 - Branch: `feature/integracao-mirage`, criada a partir de `d0fb7f2` (fim de `feature/implementar-componentes`). PR #3 (`feature/implementar-componentes` → `rc`): **aberto**, não mesclado.
 - **Versionamento autorizado pelo usuário em 19/11/2026:** todo o trabalho da integração, dos experimentos e da documentação foi dividido em 12 commits por responsabilidade ([plano de commits](plans/2026-11-17-plan-commits.md), atualização de 19/11/2026), enviado para `origin` e aberto como **PR empilhado** com base em `feature/implementar-componentes`. Depois que o #3 for mesclado, a base do PR pode passar para `rc`. Confira o número do PR com `gh pr list`.
@@ -74,11 +79,13 @@ Workflow modular de inferência de ML em Python, com componentes intercambiávei
 | Avaliador offline (IoU, TP/FP/FN, precisão e revocação) | 47 testes sintéticos; 69 passed no experimento (3.10.21 e 3.12.14); usado com dados reais na avaliação do BCCD (18/11/2026) |
 | Revisão do parser e da prova de conceito | Concluída em 17/11/2026; achados registrados |
 | Documentação reorganizada em `docs/` no padrão OKF (D1–D6) | 18/11/2026; `scripts/okf_lint.py` → `OK: no problems found.`; conferência de perda de conteúdo feita |
+| `ClassCountingComponent` + artefato `ClassCount` (VISRES-337, 23/11/2026) | 48 testes novos; suíte 357 passed + 1 skipped; experimentos 332 + 1 skipped; exemplo executado com `--detections` sobre JSONs reais já salvos ([contagem](references/component-class-counting.md)) |
 | Validador `scripts/okf_lint.py` | 35 testes em `tests/unit/scripts/`, incluindo um que valida o `docs/` real; exige links relativos (ADR 008) |
 
 ## 5. Em andamento e pendente
 
-- **Nada em andamento.** A reorganização da documentação terminou em 18/11/2026 e aguarda a revisão do usuário.
+- **VISRES-337 concluída** (23/11/2026): código revisado e aprovado, ADR 011 aceito, commit enviado ao PR #4. Limitações conhecidas mantidas: chave repetida no JSON aceita na leitura; `ClassCount` mutável. Critérios conferidos no Jira em 23/11/2026, sem divergência; comentário na tarefa com o link do PR #4 (status no Jira não alterado).
+- **VISRES-305: não iniciada**, por decisão do usuário (encerrar primeiro a VISRES-337).
 - **Aguardando o usuário:**
   1. Aprovar o resultado da reorganização.
   2. **Próxima prioridade indicada pelo usuário (não iniciada):** testes de ponta a ponta dos dois pipelines, com um relatório de execução persistido como artefato, contendo os resultados e as evidências de cada pipeline. Começa por um **plano** para aprovação.
@@ -94,6 +101,8 @@ Workflow modular de inferência de ML em Python, com componentes intercambiávei
   - separar a pesquisa do MIRAGE e a revisão do parser em relatórios (opcional, ver [plano da reorganização](plans/2026-11-18-plan-docs-restructure.md)).
 
 ## 6. Última tarefa executada
+
+23/11/2026: **VISRES-337 — `ClassCountingComponent`** e artefato `ClassCount` ([contagem](references/component-class-counting.md), [artefato](references/artifact-class-count.md), [ADR 011](adr/011-class-counting-component.md)). Modos genérico (`None`) e restrito (lista; `[]` conta nada), zeros, exclusões à parte, sem filtro de confiança e sem normalizar nomes. 48 testes novos; nenhum modelo executado. Revisada e aprovada pelo usuário (ADR 011 aceito) e versionada no PR #4 no mesmo dia.
 
 19/11/2026 (tarde): **testes de `DetectionContent`** (+17) e **fixtures compartilhadas do relatório** em `tests/unit/artifacts/report/conftest.py`; 309 passed, 1 skipped; commit enviado ao PR #4.
 
@@ -161,6 +170,10 @@ Veja o [log](log.md) para o histórico completo.
 
 ## 9. Próxima ação concreta
 
+**Agora (23/11/2026):** VISRES-337 encerrada e no PR #4. Próximo passo: aguardar o usuário. A VISRES-305 só começa com o pedido dele, por um plano. Os critérios da VISRES-337 já foram conferidos no Jira. O conector Atlassian usa o endpoint V1, obsoleto, que será removido em 01/03/2027; é preciso reconectá-lo pelo endpoint V2.
+
+Histórico da frente anterior:
+
 **Onde paramos (18/11/2026, noite):**
 
 - **Prioridade atual, do líder:** modelos multimodais **locais** alternativos ao MIRAGE, que rodem nesta máquina (i5-1235U, 15 GiB, Iris Xe). Começamos pelo Florence-2-base-ft; o próximo é o Qwen3-VL-2B-Instruct quantizado.
@@ -195,6 +208,7 @@ Veja o [log](log.md) para o histórico completo.
 
 ## 10. Arquivos para retomar
 
+- Contagem de classes (VISRES-337): `mlops_workflows/artifacts/class_count/`, `mlops_workflows/components/class_counting/`, `examples/demo_class_counting.py`, testes em `tests/{unit,integration}/components/class_counting/` e `tests/unit/artifacts/class_count/`.
 - Código: `mlops_workflows/components/interface.py`, `mlops_workflows/artifacts/{interface,content}.py`, `mlops_workflows/artifacts/detection/`, `mlops_workflows/components/{object_detection,detection_visualization,visual_question_answering,text_detection_parsing}/`, `examples/demo_detection.py`.
 - Testes: `tests/unit/components/`, `tests/integration/components/`, `tests/unit/scripts/`.
 - Docs: [status](references/status.md), [log](log.md), [invariantes](references/invariants.md), [pipeline atual](diagrams/current-pipeline.md), [relatório da demo](reports/2026-11-16-yolo-visualization-demo.md), [MIRAGE](references/mirage.md), [parser](references/component-text-detection-parsing.md), [VQA](references/component-visual-question-answering.md), [suíte de testes](references/test-suite.md), [diretrizes OKF](references/okf-guidelines.md).

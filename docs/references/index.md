@@ -2,6 +2,7 @@
 
 Documentos vivos: contratos, componentes, artefatos, estado e regras. O código é a fonte de verdade.
 
+* [Artefato de contagem de classes](artifact-class-count.md) - ClassCount, ClassCountContent e ClassCountReference — esquema, validações de consistência e persistência em JSON da saída do ClassCountingComponent.
 * [Artefatos de detecção](artifact-detection.md) - Esquema de detecções, validação, persistência e contratos de coordenadas.
 * [Relatório de execução e drivers de ponta a ponta](artifact-execution-report.md) - ExecutionReport (artefato tipado), drivers dos pipelines YOLO e MIRAGE, conversor de anotações BCCD e reúso do avaliador para o YOLO.
 * [Florence-2-base-ft — experimento local](florence2.md) - Execução isolada em CPU, formato das saídas, adaptador para DetectionContent, ajustes de compatibilidade e limites observados.
@@ -11,6 +12,7 @@ Documentos vivos: contratos, componentes, artefatos, estado e regras. O código 
 * [Modelo de artefatos](artifacts.md) - Abstrações, formatos e matriz de tipos de artefato.
 * [Artefatos de texto](artifact-text.md) - Representação de prompts e respostas textuais como artefatos UTF-8.
 * [Artefatos de vídeo](artifact-video.md) - Carregamento e salvamento de frames de vídeo sem trilha de áudio.
+* [ClassCountingComponent](component-class-counting.md) - Contagem de detecções por classe, independente do detector, nos modos genérico (todas as classes) e restrito a um domínio configurado.
 * [DetectionVisualizationComponent](component-detection-visualization.md) - Anotação independente do detector a partir de imagem e detecções.
 * [ObjectDetectionComponent](component-object-detection.md) - Adaptação entre artefato de imagem, algoritmo de inferência e artefato JSON.
 * [Padrão de componentes](components.md) - Contratos, fronteiras de responsabilidade e componentes atuais.

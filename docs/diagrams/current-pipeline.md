@@ -45,9 +45,11 @@ flowchart LR
   R --> T[TextDetectionParsingComponent]
   I --> T
   T --> J
+  J --> C[ClassCountingComponent<br/>classes: None ou lista]
+  C --> K[ClassCountReference / JSON]
 ```
 
-O VQA e o parser foram verificados só com `FakeAnswerer`.
+O VQA e o parser foram verificados só com `FakeAnswerer`. A contagem de classes (23/11/2026) foi verificada com `FakeDetector`, com o parser e com JSONs de detecções reais já salvos ([contagem](../references/component-class-counting.md)).
 
 ## Fluxo-alvo do desafio MIRAGE (planejado, não implementado)
 
