@@ -1,0 +1,8 @@
+# Applies only to experiments/mirage/. The official MIRAGE environment uses
+# Python 3.10, so rules must not suggest 3.11+ APIs (e.g. datetime.UTC, UP017).
+# The main project configuration is unchanged.
+target-version = "py310"
+
+# Resolve first-party packages (mlops_workflows, experiments) from the
+# repository root, as the main project does.
+src = ["../.."]

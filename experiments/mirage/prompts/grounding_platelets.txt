@@ -1,0 +1,1 @@
+Please provide the bounding box coordinate of the region this sentence describes: a platelet.

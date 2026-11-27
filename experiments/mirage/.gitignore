@@ -1,0 +1,6 @@
+# Generated responses and potentially sensitive input images do not belong in Git.
+outputs/
+inputs/
+__pycache__/
+*.pyc
+.pytest_cache/
