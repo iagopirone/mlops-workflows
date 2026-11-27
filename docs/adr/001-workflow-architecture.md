@@ -431,3 +431,20 @@ Também há uma diferença entre o diagrama antigo e o contrato Python atual: o 
 4. Diferenciar etapas já implementadas dos módulos somente conceituais.
 
 Origem: `docs/ADR-001-workflow-architecture.md` do snapshot `666fbb5`.
+
+## Nota de 26/11/2026: `Step` e `Pipeline` implementados (VISRES-305)
+
+O texto original acima continua sem alterações. `Step` e `Pipeline` saíram de `domain.py` e foram para `mlops_workflows/pipeline/`, imutáveis e validados na criação ([ADR 012](012-pipeline-structure-validation.md), [pipeline e etapas](../references/pipeline.md)).
+
+**Diferenças em relação ao diagrama de classes:**
+- `Step.depends_on` guarda os identificadores das etapas, não objetos `Step`;
+- o `Pipeline` guarda a finalização num campo próprio (`finalization`).
+
+**O que a validação cobre agora:**
+- a finalização como última etapa: nenhuma etapa depende dela, e todas têm caminho até ela (seção 4);
+- dependências que não podem ser atendidas: ciclos e dependências externas são recusados antes de qualquer execução (seção 5).
+
+**Continuam em aberto (seção 6):**
+- as multiplicidades de entradas e saídas;
+- a ligação entre a saída de uma etapa e a entrada de outra;
+- o orquestrador (`StepSelector`, `WorkflowRunner` etc.), que segue como esqueleto.

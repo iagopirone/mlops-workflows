@@ -20,6 +20,8 @@ sources:
 # Modelo de classes (ADR 001)
 
 > **Origem:** `docs/diagrams/02-class-diagram.mmd` (commit `6a30f8b`), migrado em 18/11/2026 sem alterar o Mermaid. Representa a arquitetura **proposta** no [ADR 001](../adr/001-workflow-architecture.md); o orquestrador **não está implementado** (`domain.py` só tem esqueletos). Para o fluxo realmente implementado, veja [pipeline atual](current-pipeline.md).
+>
+> **Divergência (26/11/2026, [ADR 012](../adr/012-pipeline-structure-validation.md)):** no código, `Step.depends_on` guarda os **identificadores** das etapas (`tuple[str, ...]`), não objetos `Step`, e o `Pipeline` tem a finalização num campo próprio (`finalization`). Veja [pipeline e etapas](../references/pipeline.md).
 
 ```mermaid
 classDiagram

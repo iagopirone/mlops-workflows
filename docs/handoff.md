@@ -17,7 +17,7 @@ sources:
   title: Código, testes e execuções locais
 ---
 
-# Handoff — última atualização: 23/11/2026
+# Handoff — última atualização: 27/11/2026
 
 > Leia este arquivo primeiro. Depois: [status](references/status.md), [log](log.md), as [invariantes](references/invariants.md) e a página técnica da tarefa em curso (índice em [index](index.md)). Regras da documentação: `docs/CLAUDE.md` e [diretrizes OKF](references/okf-guidelines.md). **Modo de trabalho: planejar → executar → validar → documentar, com aprovação do usuário antes de executar.** **O código é a fonte de verdade**; se divergir deste texto, confie no código e corrija este arquivo.
 
@@ -48,8 +48,25 @@ Workflow modular de inferência de ML em Python, com componentes intercambiávei
   - respostas inválidas ou ausentes contam como FN, nunca são excluídas;
   - não calcula AP/mAP.
 - Imagens: `np.ndarray` BGR (OpenCV).
+- **`Step`/`Pipeline` (VISRES-305, 26/11/2026):** ficam em `mlops_workflows/pipeline/`, imutáveis na estrutura (`frozen`, tuplas; imutabilidade rasa); `depends_on` guarda **identificadores** (`tuple[str, ...]`); a finalização é o campo `Pipeline.finalization`; a estrutura é validada na criação (`InvalidPipelineError`). Veja [pipeline](references/pipeline.md) e [ADR 012](adr/012-pipeline-structure-validation.md).
 
-## 3. Estado do Git (23/11/2026)
+## 3. Estado do Git (27/11/2026)
+
+- **PR #4 dividido e fechado sem merge** em 27/11/2026, a pedido do líder. Substituído pelos PRs empilhados **#5 a #11** (parte 4 = #8, VISRES-337; 5a–5c = #9–#11). Ordem de revisão: #5 → #6 → #7 → #8 e, em paralelo sobre o #7, #9 → #10 → #11. Nenhum foi mesclado. A branch `feature/integracao-mirage` foi preservada. Tabela e verificações no [log](log.md#2026-11-27). PR #3 já foi mesclado em `rc`.
+- Restos locais da divisão, que podem ser removidos com autorização: worktree `split-wt` no scratchpad de outra sessão (branch `feature/experimentos-e2e`) e branch `tmp/split-check`.
+- **VISRES-305 no PR [#12](https://github.com/iagopirone/mlops-workflows/pull/12)** (27/11/2026): branch `feature/estrutura-pipeline` (commit `9810163`), base `feature/contagem-classes` (#8). Nenhum PR foi mesclado. **Branch atual: `feature/estrutura-pipeline`.** A `feature/organizar-pipeline` ficou só local, com o commit original `0b457f1` sobre `dd2b50e`.
+- **A verificação global do Ruff (`ruff check .`) está sendo afetada por arquivos externos não versionados:** 492 erros, todos no código do Florence-2 baixado em `experiments/florence2/models/`. Nesta branch eles aparecem porque os `.gitignore` de `experiments/` só existem nas branches dos experimentos. Por decisão do usuário (27/11/2026), esses arquivos não são modificados, e a verificação é feita nos arquivos Python versionados: `git ls-files -z '*.py' | xargs -0 uv run ruff check` e `git ls-files -z '*.py' '*.md' | xargs -0 uv run ruff format --check`.
+
+Estado em 26/11/2026:
+
+
+- **Branch atual: `feature/organizar-pipeline`**, criada em 26/11/2026 a partir de `dd2b50e` (`feature/integracao-mirage`), com autorização do usuário.
+- **VISRES-305 implementada e NÃO commitada.** O usuário vai revisar o código e as decisões antes de autorizar commit, push e PR (a ideia aprovada é um PR empilhado sobre o #4).
+- Arquivos novos: `mlops_workflows/pipeline/` e `tests/unit/pipeline/`, além de `docs/adr/012-pipeline-structure-validation.md` e `docs/references/pipeline.md`.
+- Arquivos alterados: `mlops_workflows/domain.py` e os documentos vivos listados no [log](log.md#2026-11-26).
+
+Estado em 23/11/2026:
+
 
 - **VISRES-337 (contagem de classes) aprovada e versionada** em 23/11/2026, num commit próprio sobre `d3c737c` na branch `feature/integracao-mirage`, enviado ao PR #4 (sem force push, base inalterada). Confira o hash com `git log -1`. Arquivos novos: `mlops_workflows/artifacts/class_count/`, `mlops_workflows/components/class_counting/`, `examples/demo_class_counting.py`, `tests/unit/artifacts/class_count/`, `tests/unit/components/class_counting/`, `tests/integration/components/class_counting/`, `docs/references/component-class-counting.md`, `docs/references/artifact-class-count.md`, `docs/adr/011-class-counting-component.md`; documentos vivos atualizados (veja o [log](log.md#2026-11-23)).
 
@@ -80,12 +97,13 @@ Estado anterior (19/11/2026):
 | Revisão do parser e da prova de conceito | Concluída em 17/11/2026; achados registrados |
 | Documentação reorganizada em `docs/` no padrão OKF (D1–D6) | 18/11/2026; `scripts/okf_lint.py` → `OK: no problems found.`; conferência de perda de conteúdo feita |
 | `ClassCountingComponent` + artefato `ClassCount` (VISRES-337, 23/11/2026) | 48 testes novos; suíte 357 passed + 1 skipped; experimentos 332 + 1 skipped; exemplo executado com `--detections` sobre JSONs reais já salvos ([contagem](references/component-class-counting.md)) |
+| `Step` + `Pipeline` validados na criação (VISRES-305, 26/11/2026; não commitado) | 37 testes novos; suíte 394 passed + 1 skipped (sem ONNX; não repetido com modelo real após o ajuste final); experimentos 332 + 1 skipped; ruff e okf_lint OK ([pipeline](references/pipeline.md)) |
 | Validador `scripts/okf_lint.py` | 35 testes em `tests/unit/scripts/`, incluindo um que valida o `docs/` real; exige links relativos (ADR 008) |
 
 ## 5. Em andamento e pendente
 
 - **VISRES-337 concluída** (23/11/2026): código revisado e aprovado, ADR 011 aceito, commit enviado ao PR #4. Limitações conhecidas mantidas: chave repetida no JSON aceita na leitura; `ClassCount` mutável. Critérios conferidos no Jira em 23/11/2026, sem divergência; comentário na tarefa com o link do PR #4 (status no Jira não alterado).
-- **VISRES-305: não iniciada**, por decisão do usuário (encerrar primeiro a VISRES-337).
+- **VISRES-305: implementada em 26/11/2026, aguardando a revisão do usuário.** Nada foi commitado. Depois da revisão: commit, push e PR, só com autorização. O status no Jira não foi alterado.
 - **Aguardando o usuário:**
   1. Aprovar o resultado da reorganização.
   2. **Próxima prioridade indicada pelo usuário (não iniciada):** testes de ponta a ponta dos dois pipelines, com um relatório de execução persistido como artefato, contendo os resultados e as evidências de cada pipeline. Começa por um **plano** para aprovação.
@@ -101,6 +119,12 @@ Estado anterior (19/11/2026):
   - separar a pesquisa do MIRAGE e a revisão do parser em relatórios (opcional, ver [plano da reorganização](plans/2026-11-18-plan-docs-restructure.md)).
 
 ## 6. Última tarefa executada
+
+27/11/2026: **VISRES-305 versionada** e aberta como PR #12, empilhado sobre o #8; 394 passed, 1 skipped na nova base. Veja o [log](log.md#2026-11-27).
+
+27/11/2026: **divisão do PR #4 publicada.** Push das sete branches, PRs empilhados #5–#11 abertos (nenhum mesclado), bases, commits e árvore conferidos, e só então o PR #4 foi fechado sem merge, com comentário e a branch preservada. Comentário na VISRES-337 com o link do #8. Detalhes no [log](log.md#2026-11-27).
+
+26/11/2026: **VISRES-305 — `Step` e `Pipeline`** em `mlops_workflows/pipeline/` ([pipeline](references/pipeline.md), [ADR 012](adr/012-pipeline-structure-validation.md)). Estruturas imutáveis, dependências por identificador, finalização num campo próprio e validação na criação. O pipeline de exemplo (detecção → visualização + contagem → finalização) só é construído e validado, num teste. Nenhum componente foi alterado. O código novo não executa modelos; a verificação com ONNX (391 passed) rodou o teste de integração do YOLO já existente, que faz uma inferência real em CPU. Decisões 8–11 e a imutabilidade só da estrutura aprovadas em 26/11/2026; ADR 012 aceito.
 
 23/11/2026: **VISRES-337 — `ClassCountingComponent`** e artefato `ClassCount` ([contagem](references/component-class-counting.md), [artefato](references/artifact-class-count.md), [ADR 011](adr/011-class-counting-component.md)). Modos genérico (`None`) e restrito (lista; `[]` conta nada), zeros, exclusões à parte, sem filtro de confiança e sem normalizar nomes. 48 testes novos; nenhum modelo executado. Revisada e aprovada pelo usuário (ADR 011 aceito) e versionada no PR #4 no mesmo dia.
 
@@ -170,6 +194,12 @@ Veja o [log](log.md) para o histórico completo.
 
 ## 9. Próxima ação concreta
 
+**Agora (27/11/2026):** PRs #5–#12 aguardam revisão, na ordem #5 → #6 → #7 → #8 → #12 e, em paralelo, #9 → #10 → #11. Nada a fazer até o retorno da revisão; nenhum merge sem autorização. O conector Atlassian continua no endpoint V1, obsoleto.
+
+Situação anterior (26/11/2026): a arquitetura e o ADR 012 foram aprovados; o ajuste final (tipos de `component` e dos artefatos no `Step`) foi feito e aguarda a confirmação do usuário. Depois disso, só com autorização: commit, push e PR da VISRES-305. Só com autorização: commit na `feature/organizar-pipeline`, push e PR empilhado sobre o #4. O ADR 012 passa a Aceito depois da aprovação.
+
+Situação anterior (23/11/2026):
+
 **Agora (23/11/2026):** VISRES-337 encerrada e no PR #4. Próximo passo: aguardar o usuário. A VISRES-305 só começa com o pedido dele, por um plano. Os critérios da VISRES-337 já foram conferidos no Jira. O conector Atlassian usa o endpoint V1, obsoleto, que será removido em 01/03/2027; é preciso reconectá-lo pelo endpoint V2.
 
 Histórico da frente anterior:
@@ -208,6 +238,7 @@ Histórico da frente anterior:
 
 ## 10. Arquivos para retomar
 
+- Pipeline (VISRES-305): `mlops_workflows/pipeline/{step,pipeline,invalid_pipeline_error}.py`, `mlops_workflows/domain.py`, `tests/unit/pipeline/` (`conftest.py`, `test_step.py`, `test_pipeline.py`, `test_example_pipeline.py`).
 - Contagem de classes (VISRES-337): `mlops_workflows/artifacts/class_count/`, `mlops_workflows/components/class_counting/`, `examples/demo_class_counting.py`, testes em `tests/{unit,integration}/components/class_counting/` e `tests/unit/artifacts/class_count/`.
 - Código: `mlops_workflows/components/interface.py`, `mlops_workflows/artifacts/{interface,content}.py`, `mlops_workflows/artifacts/detection/`, `mlops_workflows/components/{object_detection,detection_visualization,visual_question_answering,text_detection_parsing}/`, `examples/demo_detection.py`.
 - Testes: `tests/unit/components/`, `tests/integration/components/`, `tests/unit/scripts/`.

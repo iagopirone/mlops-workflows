@@ -20,7 +20,7 @@ sources:
   title: Evidências da conversa de desenvolvimento
 ---
 
-# Matriz de estado (atualizada em 23/11/2026)
+# Matriz de estado (atualizada em 26/11/2026)
 
 Legenda: **Verificado** = inspecionado no código e/ou executado em 17/11/2026 · **Aprovado** = decisão do usuário ainda sem código · **Hipótese** = não comprovada · **Planejado** = proposta.
 
@@ -46,7 +46,8 @@ Legenda: **Verificado** = inspecionado no código e/ou executado em 17/11/2026 �
 | Prova de conceito do MIRAGE em `experiments/mirage/` | Arquivos presentes (não versionados; criados fora desta sessão), revisados e **corrigidos** em 17/11/2026 | 22 passed no Python 3.10.21 e no 3.12.14; dry run real no 3.10 OK. **Nunca executada contra o MIRAGE real.** Veja [MIRAGE](mirage.md) |
 | Avaliador offline (`experiments/mirage/evaluate_detections.py`) | Verificado com dados sintéticos (não commitado), **experimental** | 47 passed no 3.10.21 e no 3.12.14; nunca usado com respostas reais. Veja [avaliador](mirage-evaluation.md) |
 | Revisão do parser | Concluída em 17/11/2026 | Conforme as decisões. **P1–P3 corrigidos** (chaves duplicadas, `cls` com espaços, `bool`); P4–P7 só documentados. Veja [interpretação](component-text-detection-parsing.md#correções-p1p3-17112026-aprovadas-pelo-usuário) |
-| PR #3 (`feature/implementar-componentes` → `rc`) | **Aberto** (verificado com `gh` em 17/11/2026) | Ainda não mesclado; `origin/rc` em `5346957` |
+| PR #3 (`feature/implementar-componentes` → `rc`) | **Mesclado** (verificado com `gh` em 27/11/2026) | `origin/rc` em `f50f2f8`, mesma árvore de `d0fb7f2` |
+| Divisão do PR #4 em 7 PRs menores | **Publicada em 27/11/2026**: PRs empilhados #5–#11 abertos (nenhum mesclado); PR #4 fechado sem merge, branch preservada; VISRES-337 comentada com o link do #8 | Pedido do líder; bases, commits e árvore conferidos antes do fechamento ([log](../log.md#2026-11-27)) |
 | Adaptador real `MirageAnswerer` | Não iniciado | Mecanismo fora do processo, a definir. **O VQA não está integrado ao MIRAGE**; o pipeline 2 lê a resposta salva pelo `run_poc.py` como `TextReference` |
 | MIRAGE real executado | **Não** | Nunca rodou neste projeto |
 | Pipelines E2E, terceira rodada (E4, relatório, correções) | **Implementado e testado com dados sintéticos** (18/11/2026); nenhum modelo executado | Adaptador do formato do treino, ferramenta do relatório com verificações de inferência real, VRAM amostrada pelo `run_poc.py`, exclusões e substituições do BCCD, proteção `E2E_ALLOW_REAL_MODELS`. Plano de execução real e decisões R1–R6 na seção 12 do [plano](../plans/2026-11-18-plan-real-models-e2e.md); **pausado** pela prioridade Florence-2 |
@@ -61,7 +62,8 @@ Legenda: **Verificado** = inspecionado no código e/ou executado em 17/11/2026 �
 | Pipelines de ponta a ponta com modelos reais (YOLO e MIRAGE) + relatório como artefato | **Preparação local implementada e testada com dados sintéticos** (18/11/2026); nenhum modelo executado para resultados; E4 e E8 em proposta | E1–E7 aprovadas; [plano](../plans/2026-11-18-plan-real-models-e2e.md), [ADR 009](../adr/009-execution-report-artifact.md), [relatório e drivers](artifact-execution-report.md). Validação do nome do checkpoint no `run_poc.py` (E3) implementada |
 | MIRAGE produzir bounding boxes confiáveis | **Hipótese experimental** | Sem capacidade documentada; veja [MIRAGE](mirage.md) |
 | `ClassCountingComponent` + artefato `ClassCount` (VISRES-337) | **Verificado e aprovado** em 23/11/2026; commit autorizado (VISRES-337) | Regras da tarefa e decisões do [ADR 011](../adr/011-class-counting-component.md) aprovadas pelo usuário depois da revisão do código. Limitações conhecidas registradas, sem correção: chave repetida no JSON aceita na leitura; `ClassCount` mutável. 48 testes novos (24 + 22 + 2); suíte principal 357 passed + 1 skipped; experimentos 332 + 1 skipped. Exemplo `examples/demo_class_counting.py` executado só com `--detections` sobre JSONs já salvos (YOLO e Qwen3-VL); o caminho `--model` não foi executado. Veja [contagem](component-class-counting.md) |
-| Orquestrador (`WorkflowRunner`, `StepSelector` etc.) | Só esqueletos | `domain.py` com `NotImplementedError` |
+| `Step` e `Pipeline` em `mlops_workflows/pipeline/` (VISRES-305) | **Verificado** em 26/11/2026; aprovado e versionado em 27/11/2026 no PR [#12](https://github.com/iagopirone/mlops-workflows/pull/12) (base #8; 394 passed + 1 skipped na nova base) | Imutáveis na estrutura (rasa), tipos de `component` e dos artefatos verificados, `depends_on` por identificador, finalização em campo próprio, validação na criação (IDs duplicados ou vazios, dependência externa, ciclo, autodependência, dependência repetida, nenhuma etapa de processamento, dependência da finalização, etapa sem caminho até a finalização). Decisões 1–11 aprovadas em 26/11/2026 ([ADR 012](../adr/012-pipeline-structure-validation.md), aceito); arquitetura aprovada pelo usuário em 27/11/2026. 37 testes novos; suíte 394 passed + 1 skipped (ONNX não repetido após o ajuste final); experimentos 332 + 1 skipped. Pipeline de exemplo só estrutural, num teste. Veja [pipeline](pipeline.md) |
+| Orquestrador (`WorkflowRunner`, `StepSelector` etc.) | Só esqueletos | `domain.py` com `NotImplementedError`; `Step` e `Pipeline` agora vêm de `mlops_workflows/pipeline/` |
 
 ## Resultados de testes por arquivo (17/11/2026; validador acrescentado em 18/11/2026)
 

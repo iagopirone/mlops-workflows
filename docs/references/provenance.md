@@ -71,7 +71,7 @@ A partir de 18/11/2026, todos os documentos usam autoria humana, `generated.by: 
 | Agente (valor antigo de `generated.by`) | Contribuição |
 |---|---|
 | `openai/gpt-6` | Geração original do bundle OKF em 16/11/2026, a partir do snapshot `666fbb5` e de relatos da conversa. Também gerou `integrations/mirage-poc.md`. Os arquivos iniciais de `experiments/mirage/` foram criados no mesmo horário (14:54 de 17/11/2026), fora da sessão do Claude Code; que tenham o mesmo autor é **hipótese** |
-| `anthropic/claude-opus-5-5` (Claude Code) | Desde 17/11/2026: sincronização com o checkout local, páginas novas (VQA, parser, avaliador, handoff), revisões, correções, esta reorganização e os documentos de avaliação de modelos locais (incluindo o resumo de 19/11/2026); em 23/11/2026, a implementação e a documentação do `ClassCountingComponent` (VISRES-337, ADR 011) |
+| `anthropic/claude-opus-5-5` (Claude Code) | Desde 17/11/2026: sincronização com o checkout local, páginas novas (VQA, parser, avaliador, handoff), revisões, correções, esta reorganização e os documentos de avaliação de modelos locais (incluindo o resumo de 19/11/2026); em 23/11/2026, a implementação e a documentação do `ClassCountingComponent` (VISRES-337, ADR 011); em 26/11/2026, a implementação e a documentação de `Step`/`Pipeline` (VISRES-305, ADR 012) |
 | Humano (Iago Pirone) | Texto original do ADR 001 e dos diagramas `.mmd` (commit `6a30f8b`, 15/10/2026); todas as decisões aprovadas registradas no log |
 
 **Migração de 18/11/2026** (bundle `docs/mlops-workflows-okf-0.2/` → `docs/`, [plano](../plans/2026-11-18-plan-docs-restructure.md)). Valores antigos do frontmatter de cada documento:

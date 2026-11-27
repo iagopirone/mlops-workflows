@@ -2,6 +2,120 @@
 
 Entradas da mais recente para a mais antiga. Datas absolutas. Formato e regras em [diretrizes OKF](references/okf-guidelines.md#log).
 
+## 2026-11-27
+
+**VISRES-305 versionada e PR #12 aberto** (autorizado pelo usuário; nenhum merge)
+
+- Conferido antes do commit: `Step` recusa com `TypeError` um `component` que não seja `Component` e itens de `input_artifacts`/`output_artifacts` que não sejam `ArtifactReference`. Os testes cobrem os três campos, e os 37 testes de `tests/unit/pipeline/` passam.
+- Commit `0b457f1` na `feature/organizar-pipeline` (local, sem push). Levado com `cherry-pick -x`, sem conflitos, para a branch nova `feature/estrutura-pipeline`, criada a partir de `feature/contagem-classes` (#8). Na nova branch o commit é `9810163`.
+- **Sem experimentos no PR:** o commit transportado tem 21 arquivos, nenhum em `experiments/`. O patch é idêntico ao original, e o diff de `experiments/` em relação ao #8 está vazio.
+- **Verificação na nova base, sem modelos reais:** suíte principal **394 passed, 1 skipped** (o skip é o YOLO real); `okf_lint` OK; `ruff check` e `ruff format --check` OK nos arquivos versionados.
+- **Problema observado:** `ruff check .` acusa 492 erros, todos em arquivos não versionados de `experiments/florence2/models/` (código do Florence-2 baixado localmente). Nesta base eles aparecem porque os `.gitignore` de `experiments/` só existem nas branches dos experimentos. Os arquivos não foram apagados nem versionados.
+- **PR [#12](https://github.com/iagopirone/mlops-workflows/pull/12):** base `feature/contagem-classes`, 1 commit, 21 arquivos, `MERGEABLE`. Ordem de revisão: #5 → #6 → #7 → #8 → #12.
+- **Depois da abertura:** o usuário aprovou o PR #12 e autorizou um commit só de documentação (`docs/log.md`, `docs/handoff.md`, `docs/references/status.md`) com o registro da abertura. Decisão do usuário: os arquivos do Florence-2 não são modificados, e o Ruff passa a rodar nos arquivos Python versionados, porque a verificação global está sendo afetada por esses arquivos externos não versionados.
+
+**Divisão do PR #4 publicada: PRs #5 a #11 abertos e PR #4 fechado** (autorizado pelo usuário: push, PRs, fechamento do #4 e comentário no Jira)
+
+- **Push** das sete branches, sem force push. O hook `protected-branches` passou, e as alterações locais da VISRES-305 foram preservadas (15 entradas no `git status`, como antes).
+- **PRs empilhados abertos** (nenhum mesclado). A numeração segue a do plano (1–4, 5a–5c). O quarto PR da divisão é o #8, não o PR #4 original:
+
+| Parte | PR | Branch | Base |
+|---|---|---|---|
+| 1 | [#5](https://github.com/iagopirone/mlops-workflows/pull/5) | `docs/padrao-okf` | `rc` |
+| 2 | [#6](https://github.com/iagopirone/mlops-workflows/pull/6) | `feature/artefatos-texto-relatorio` | `docs/padrao-okf` |
+| 3 | [#7](https://github.com/iagopirone/mlops-workflows/pull/7) | `feature/componentes-multimodais` | `feature/artefatos-texto-relatorio` |
+| 4 | [#8](https://github.com/iagopirone/mlops-workflows/pull/8) | `feature/contagem-classes` (VISRES-337) | `feature/componentes-multimodais` |
+| 5a | [#9](https://github.com/iagopirone/mlops-workflows/pull/9) | `feature/experimento-mirage` | `feature/componentes-multimodais` |
+| 5b | [#10](https://github.com/iagopirone/mlops-workflows/pull/10) | `feature/experimentos-florence-qwen` | `feature/experimento-mirage` |
+| 5c | [#11](https://github.com/iagopirone/mlops-workflows/pull/11) | `feature/experimentos-e2e` | `feature/experimentos-florence-qwen` |
+
+- **Ordem de revisão indicada em todos os PRs:** #5 → #6 → #7 → #8 e, em paralelo sobre o #7, #9 → #10 → #11. A descrição do #9 diz explicitamente que o MIRAGE **não** foi executado.
+- **Verificado antes de fechar o #4:**
+  - as sete bases estão corretas;
+  - cada PR contém exatamente os commits de origem previstos (lidos das linhas `cherry picked from`). Somados, são 16, o total do PR #4;
+  - o número de arquivos é o mesmo no GitHub e no `git diff` local (73, 35, 16, 27, 12, 17, 14);
+  - todos os PRs aparecem como `MERGEABLE`;
+  - `git merge-tree` de #8 com #11 dá a árvore `8e264f0`, idêntica à de `dd2b50e`.
+- **PR #4 fechado sem merge**, com um comentário listando os novos PRs. A branch `feature/integracao-mirage` continua no remoto, em `dd2b50e`.
+- **Jira:** comentário na VISRES-337 com o link do #8. O status da tarefa não foi alterado.
+- **Problema e solução:** `gh pr edit` falhou com um erro do GitHub (Projects classic descontinuado). As descrições foram atualizadas pela API REST (`gh api -X PATCH`).
+- **Títulos e numeração corrigidos** (aprovado pelo usuário): os PRs tinham sido abertos com títulos diferentes dos propostos no plano (sufixo "[divisão do #4, parte N/7]" e textos encurtados), sem aprovação. Os títulos voltaram a ser os do plano e as descrições passaram à numeração 1–4/5a–5c, pela API REST. Foi acrescentado no PR #4 um comentário com a numeração corrigida. Código e branches não mudaram.
+- **Correção de registro:** a entrada abaixo dizia que o PR #4 tinha 14 commits. O GitHub mostra 16, e todos estão cobertos pela tabela.
+
+**Divisão do PR #4 em PRs menores** (pedido do líder; plano aprovado pelo usuário; branches só locais, sem push)
+
+- **Motivo:** o PR #4 tinha 14 commits, 172 arquivos e cerca de 18 mil linhas. O líder pediu PRs menores. O PR da VISRES-305 só será aberto depois que os novos forem reenviados.
+- **Como:** os commits do #4 foram copiados com `cherry-pick -x`, sem alterar código, para branches novas a partir de `origin/rc` (mesma árvore de `d0fb7f2`). O trabalho foi feito num `git worktree` separado, sem trocar a branch nem mexer nas alterações locais da VISRES-305.
+
+| # | Branch | Base | Commits de origem |
+|---|---|---|---|
+| 1 | `docs/padrao-okf` | `rc` | `de40726` |
+| 2 | `feature/artefatos-texto-relatorio` | 1 | `165981d`, `c63a90d`, `f289fbc`, `c75e546`, `557897c`, `d3c737c` |
+| 3 | `feature/componentes-multimodais` | 2 | `fb150f3`, `f780760`, `5bed40b` |
+| 4 | `feature/contagem-classes` (VISRES-337) | 3 | `d003e39`, `dd2b50e` |
+| 5a | `feature/experimento-mirage` | 3 | `da67bb6` |
+| 5b | `feature/experimentos-florence-qwen` | 5a | `653c2d9`, `1404571` |
+| 5c | `feature/experimentos-e2e` | 5b | `85d6bf3` |
+
+- **Decisões (recomendação aceita pelo usuário):** experimentos em três PRs; documentação OKF num PR só, avisando que ela descreve código dos PRs seguintes; 4 e 5a–5c em paralelo sobre o 3.
+- **Verificado:**
+  - aplicando 4 sobre 5c, a árvore é **idêntica** à de `dd2b50e` (`git diff` vazio);
+  - em cada branch, `ruff check`, `ruff format --check` e `okf_lint` OK;
+  - suíte principal: 112 (1), 180 (2), 309 (3, 5a, 5b, 5c) e 357 (4) passed, sempre com 1 skipped (YOLO real);
+  - experimentos: 168 (5a), 226 (5b) e 332 passed + 1 skipped (5c);
+  - nenhum modelo real executado.
+- **Pendente de autorização:** push das branches, abertura dos PRs e fechamento do #4 com um comentário apontando os novos. `feature/integracao-mirage` não será apagada.
+
+## 2026-11-26
+
+**VISRES-305 — ajuste final: tipos de `component` e dos artefatos** (pedido do usuário; não commitado)
+
+- O usuário aprovou a arquitetura e o ADR 012 e pediu um ajuste: `Step.__post_init__()` passa a recusar com `TypeError` um `component` que não seja `Component` e itens de `input_artifacts`/`output_artifacts` que não sejam `ArtifactReference`.
+- +4 testes em `test_step.py` (16 no arquivo; 37 em `tests/unit/pipeline/`).
+- **Resultados:** suíte principal **394 passed, 1 skipped** (o skip é o teste do YOLO real); experimentos 332 passed, 1 skipped (rodados sem `E2E_ALLOW_REAL_MODELS`); `ruff check`, `ruff format --check` e `okf_lint` OK. **Nenhum modelo real executado**, a pedido do usuário; a rodada com ONNX não foi repetida.
+- Documentação: [pipeline](references/pipeline.md), ADR 012 (atualização datada), suíte de testes, status e handoff.
+
+**VISRES-305 — decisões 8–11 aprovadas e revisão final** (pedido do usuário; não commitado)
+
+- O usuário aprovou os itens 8–11 do [ADR 012](adr/012-pipeline-structure-validation.md) e a imutabilidade limitada à estrutura, desde que documentada. O ADR passou a Aceito.
+- **Revisão final, sem mudança de comportamento:**
+  - docstring de `Step` corrigida (só a estrutura é imutável);
+  - limitações documentadas em [pipeline](references/pipeline.md#limitações): tipo de `component` e dos artefatos não verificado, `hash` falha com artefatos, nomes não normalizados.
+- **Correção de registro:** a entrada abaixo dizia "nenhum modelo foi executado". O código novo e os testes dele não executam modelos. Mas a verificação com `DETECTION_MODEL_PATH`/`DETECTION_IMAGE_PATH`, que deu 391 passed, rodou o teste de integração já existente `tests/integration/components/object_detection/test_object_detection_component.py`. Esse teste carrega o `best.onnx` local e faz **uma inferência real do YOLO em CPU** numa imagem. O comando está na verificação padrão do `CLAUDE.md`, mas não foi pedida autorização específica, como em tarefas anteriores. O teste do e2e com modelo real foi pulado (sem `E2E_ALLOW_REAL_MODELS`).
+
+**VISRES-305 — `Step` e `Pipeline` em pasta própria, com validação da estrutura** (plano aprovado pelo usuário; não commitado, aguardando revisão)
+
+- **Tarefa:** lida no Jira em 26/11/2026. Pasta própria para o `Pipeline`; validação de IDs duplicados, dependências externas e circulares; finalização como etapa com pré-requisitos; pipeline de exemplo e testes.
+- **Branch:** `feature/organizar-pipeline`, criada a partir de `dd2b50e` com autorização do usuário.
+- **Decisões aprovadas** ([ADR 012](adr/012-pipeline-structure-validation.md), itens 1–7):
+  - `depends_on` por identificador (`tuple[str, ...]`), porque com objetos imutáveis seria impossível montar um ciclo e testar a regra;
+  - estruturas `frozen` com tuplas;
+  - finalização num campo próprio (`Pipeline.finalization`);
+  - validação na criação, com `InvalidPipelineError(ValueError)`;
+  - validações extras: IDs vazios, autodependência, dependência repetida, nenhuma etapa de processamento;
+  - exemplo só estrutural, num teste.
+- **Escolhas propostas, aguardando aprovação** (ADR 012, itens 8–11):
+  - regras locais da etapa no `Step`;
+  - `TypeError` para tipos errados (listas, IDs que não são texto, itens que não são `Step`);
+  - só o primeiro problema é informado;
+  - dataclass em vez de Pydantic.
+- **Imutabilidade rasa (verificado):** referências de artefatos e componentes dentro das etapas continuam mutáveis.
+- **Código:**
+  - novos: `mlops_workflows/pipeline/{step,pipeline,invalid_pipeline_error}.py`;
+  - `domain.py` só troca as definições de `Step` e `Pipeline` pela importação; `Event`, `PipelineRepository` e os esqueletos não mudaram;
+  - nenhum componente existente foi alterado; o código novo não executa modelos (a verificação com ONNX rodou o teste de integração do YOLO; veja a correção acima).
+- **Testes:**
+  - 33 novos em `tests/unit/pipeline/` (12 de `Step`, 19 de `Pipeline`, 2 do exemplo);
+  - suíte principal **390 passed, 1 skipped** sem ONNX e **391 passed** com o ONNX real;
+  - experimentos 332 passed, 1 skipped (inalterado);
+  - `ruff check`, `ruff format --check` e `okf_lint` OK.
+- **Documentação:**
+  - novos: [pipeline e etapas](references/pipeline.md) e ADR 012;
+  - nota datada no [ADR 001](adr/001-workflow-architecture.md#nota-de-26112026-step-e-pipeline-implementados-visres-305), sem alterar o texto original;
+  - divergência anotada no [modelo de classes](diagrams/class-model.md);
+  - atualizados: estrutura do repositório, suíte de testes, proveniência, status e handoff.
+- **Em aberto:** multiplicidade de entradas e saídas; ligação saída → entrada; componente concreto de finalização; orquestrador.
+
 ## 2026-11-23
 
 **VISRES-337 — critérios conferidos no Jira** (pedido do usuário)
